@@ -1,0 +1,119 @@
+name: SE3112 Automated Testing Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation-check:
+    name: Verify Repository Foundation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate Repository Layout
+        run: |
+          echo "Validating directory structure..."
+          for dir in docs unit-tests mutation-tests load-tests e2e-tests quality-checks test-reports scripts .github/workflows; do
+            if [ -d "$dir" ]; then
+              echo "✓ Directory '$dir' exists."
+            else
+              echo "✗ Missing directory: '$dir'"
+              exit 1
+            fi
+          done
+
+      - name: Log Foundation Status
+        run: |
+          echo "=========================================================="
+          echo "SE3112 Cinnamon Bistro CSP Test Automation Pipeline"
+          echo "Foundation verification passed successfully."
+          echo "=========================================================="
+
+  quality-checks:
+    name: Quality Checks & Static Analysis
+    needs: foundation-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Static Analysis Placeholder
+        run: |
+          echo "[PHASE 1] Static Code Analysis & Linting"
+          echo "Ready for linter and SAST security scanner configurations."
+
+  unit-tests:
+    name: Unit Testing Suite
+    needs: foundation-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Unit Tests Placeholder
+        run: |
+          echo "[PHASE 2] Unit Testing Execution"
+          echo "Ready for unit test harness and mock runner integration."
+
+  mutation-tests:
+    name: Mutation Testing Suite
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Mutation Tests Placeholder
+        run: |
+          echo "[PHASE 3] Mutation Testing Execution"
+          echo "Ready for mutation testing engine (e.g. Stryker/Pitest) integration."
+
+  e2e-tests:
+    name: End-to-End & Integration Testing
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: E2E Tests Placeholder
+        run: |
+          echo "[PHASE 4] End-to-End Scenario Execution"
+          echo "Ready for container orchestration and API journey tests."
+
+  load-tests:
+    name: Load & Performance Testing
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Load Tests Placeholder
+        run: |
+          echo "[PHASE 5] Load & Performance Benchmarking"
+          echo "Ready for k6 / performance workload scripts."
+
+  publish-reports:
+    name: Aggregate & Publish Test Reports
+    needs: [quality-checks, unit-tests, mutation-tests, e2e-tests, load-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary Placeholder
+        run: |
+          echo "Consolidated test reports and coverage outputs ready for artifact aggregation."
+

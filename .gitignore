@@ -1,0 +1,99 @@
+# ==============================================================================
+# Environment & Secrets
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ==============================================================================
+# Dependencies & Package Managers
+# ==============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+vendor/
+packages/
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Java / Maven / Gradle
+target/
+*.class
+.gradle/
+build/
+bin/
+out/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# Go
+*.exe
+*.test
+*.prof
+
+# ==============================================================================
+# Test Reports & Quality Check Outputs
+# ==============================================================================
+test-reports/*
+!test-reports/.gitkeep
+coverage/
+.nyc_output/
+*.lcov
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+reports/
+stryker.log
+pit-reports/
+k6-results/
+cypress/videos/
+cypress/screenshots/
+playwright-report/
+test-results/
+
+# ==============================================================================
+# IDE & Editor Configurations
+# ==============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# ==============================================================================
+# Operating System Artifacts
+# ==============================================================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# ==============================================================================
+# Logs & Temporary Files
+# ==============================================================================
+logs/
+*.log
+*.tmp
+*.bak
+
