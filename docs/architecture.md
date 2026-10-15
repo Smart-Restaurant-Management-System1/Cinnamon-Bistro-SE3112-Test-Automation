@@ -2,21 +2,25 @@
 
 ## 1. Introduction & Context
 
-This document outlines the testing architecture for the **SE3112 Advanced Software Engineering** quality assurance initiative, targeting the **Cinnamon Bistro SE3022 Cloud Services Platform (CSP)**.
+This document defines the architectural model for the **SE3112 Advanced Software Engineering** automated quality assurance repository, designed to validate the **Cinnamon Bistro SE3022 Cloud Services Platform (CSP)**.
 
-Cinnamon Bistro is an enterprise-grade restaurant management and customer ordering platform designed as a distributed microservice system. To ensure zero-downtime reliability, data integrity, and strict SLA compliance, this repository decouples testing harnesses, synthetic workloads, and verification pipelines from the operational codebase.
+### Decoupling Principle: System Under Test (SUT) vs. Test Automation Harness
+A fundamental engineering principle of this project is the strict separation between the target application and the automated test harness:
+- **SE3022 Cinnamon Bistro CSP (Application Repository)**: Contains the production application codebase, domain microservices, persistence logic, API gateway implementations, and operational infrastructure.
+- **SE3112 Test Automation (This Repository)**: Operates strictly as an **external quality engineering harness**. It does not modify application business logic. Instead, it interacts with the microservices through public contracts, HTTP/REST endpoints, client interfaces, or isolated service-level tests.
 
 ---
 
-## 2. System Under Test (SUT): Cinnamon Bistro CSP
+## 2. System Under Test (SUT): Cinnamon Bistro CSP (Conceptual Overview)
 
-The Cinnamon Bistro CSP microservice architecture typically consists of distinct distributed domains:
+> **Important Architectural Disclaimer**:  
+> The diagram and component boundaries below represent a **conceptual model** of the Cinnamon Bistro restaurant management platform based on typical microservice patterns. Specific service names, inter-service protocols, event brokers, and database technologies **must be formally verified against the actual SE3022 CSP codebase** prior to finalizing test fixtures.
 
 ```mermaid
 flowchart TD
-    Client["Clients (Web / Mobile / Admin)"] --> Gateway["API Gateway / Reverse Proxy"]
+    Client["Clients (Web Frontend / Mobile / Admin) [Conceptual]"] --> Gateway["API Gateway / Reverse Proxy [Conceptual]"]
     
-    subgraph Core Services
+    subgraph Core Services [Conceptual - Subject to CSP Verification]
         Gateway --> Auth["Authentication & User Service"]
         Gateway --> Menu["Menu & Catalog Service"]
         Gateway --> Order["Order Management Service"]
@@ -24,13 +28,12 @@ flowchart TD
         Gateway --> Billing["Payment & Billing Service"]
     end
 
-    subgraph Asynchronous & Event Bus
+    subgraph Asynchronous Infrastructure [Conceptual - Subject to Verification]
         Order -.-> Broker["Message Broker / Event Stream"]
         Broker -.-> Notification["Notification Service"]
-        Broker -.-> Analytics["Reporting & Analytics"]
     end
 
-    subgraph Data Stores
+    subgraph Data Layer [Conceptual - Subject to Verification]
         Auth --- AuthDB[("Auth DB")]
         Menu --- MenuDB[("Menu DB")]
         Order --- OrderDB[("Order DB")]
@@ -39,74 +42,77 @@ flowchart TD
     end
 ```
 
-### Key Architectural Characteristics
-- **Loosely Coupled Services**: Microservices communicate over RESTful APIs and asynchronous message queues.
-- **Polyglot & Isolated Persistence**: Microservices maintain independent databases preventing cross-domain schema coupling.
-- **Dynamic Routing & Security**: Centralized API Gateway handles rate limiting, authentication verification, and route proxying.
+### Unverified Architectural Elements (Requiring Source Verification)
+- **Service Boundaries**: Number, naming, and autonomy of individual microservices.
+- **Inter-Service Communication**: REST over HTTP vs. gRPC vs. message queue (e.g., RabbitMQ / Kafka / Redis).
+- **Persistence Technologies**: SQL (PostgreSQL/MySQL) vs. NoSQL (MongoDB) configurations per service.
+- **Authentication Mechanism**: JWT structure, session management, or OAuth2 flows.
 
 ---
 
-## 3. Test Automation Pipeline Architecture
+## 3. Test Automation Pipeline Architecture & Ownership
 
-The automated testing harness operates as an external, multi-tier validation layer interacting with the Cinnamon Bistro CSP microservices across various deployment environments (Local Mock, CI Ephemeral Containers, and Staging).
+The automated testing harness is structured into distinct, modular validation layers executing within a shared CI/CD workflow:
 
 ```mermaid
 flowchart LR
-    subgraph Test Harness Architecture
-        QC["Static Quality Checks\n(Lint, SAST, Audit)"]
-        Unit["Unit Tests\n(Mocked Dependencies)"]
-        Mutation["Mutation Engine\n(Fault Injection)"]
-        E2E["E2E & Integration Harness\n(API Contracts, Scenarios)"]
-        Load["Load & Performance Engine\n(k6 / Virtual Users)"]
+    subgraph Individual Testing Ownership
+        QC["Code Quality & Metrics\nOwner: Wijesinghe K"]
+        Unit["Unit Testing & Mocking\nOwner: Perera H.L.P.S."]
+        E2E["UI / E2E Testing\nOwner: H.R.M.A.A. Bandara"]
+        Load["Load & Performance Testing\nOwner: D.M.N. Presanjith"]
+        Mut["Mutation Testing\n[Reserved / Unassigned]"]
     end
 
-    subgraph Execution & CI/CD
+    subgraph Shared Group CI/CD Orchestration [Lead: Wijesinghe K]
         Workflow["GitHub Actions CI Pipeline"]
-        Artifacts["Aggregated Reports\n(HTML, JUnit, Coverage)"]
+        Artifacts["Aggregated Reports & Artifacts\n(test-reports/)"]
     end
 
-    subgraph Target Environments
-        Docker["Docker Compose / Test Containers"]
-        CSP["Cinnamon Bistro CSP Microservices"]
+    subgraph Target Environments [Planned]
+        LocalDev["Local Mock / Test Doubles"]
+        DockerEnv["Docker Compose / Containerized SUT [Planned]"]
+        CSPApp["Cinnamon Bistro CSP Microservices"]
     end
 
     Workflow --> QC
     Workflow --> Unit
-    Workflow --> Mutation
     Workflow --> E2E
     Workflow --> Load
 
-    E2E --> Docker
-    Load --> Docker
-    Docker --> CSP
+    Unit --> LocalDev
+    E2E --> DockerEnv
+    Load --> DockerEnv
+    DockerEnv -.-> CSPApp
 
     QC --> Artifacts
     Unit --> Artifacts
-    Mutation --> Artifacts
     E2E --> Artifacts
     Load --> Artifacts
 ```
 
 ---
 
-## 4. Layered Quality Strategy
+## 4. Layered Quality Strategy & Responsibility Matrix
 
-| Test Layer | Target Boundary | Isolation Strategy | Verification Goal |
-| :--- | :--- | :--- | :--- |
-| **Quality Checks** | Source Code & Configs | Static (no execution) | Ensure code style, catch common vulnerabilities, and maintain dependency hygiene. |
-| **Unit Testing** | Classes, Methods, Business Logic | Full Isolation (stubs, mocks, fakes) | Verify algorithms, state transitions, validation rules, and error handling. |
-| **Mutation Testing** | Unit Test Assertions & Logic | Fault Injection | Validate that test assertions fail when code mutants are introduced (killing mutants). |
-| **End-to-End (E2E)** | API Gateway & Service Chains | Ephemeral containerized instances | Ensure integrated user workflows (e.g., browse menu -> reserve table -> place order -> bill payment). |
-| **Load Testing** | Ingress, Endpoints, Persistence | Target service instances under load | Benchmark throughput (RPS), p95/p99 latency, degradation thresholds, and stability under peak traffic. |
+| Quality Layer | Target Boundary | Isolation Strategy | Responsible Owner | Primary Assessment Scope |
+| :--- | :--- | :--- | :--- | :--- |
+| **Code Quality & Metrics** | Test repo & application codebases | Static analysis (no execution required) | **Wijesinghe K**<br>`IT24102587` | Linters, SAST security scanners, cyclomatic complexity metrics, quality gate enforcement, and CI orchestration. |
+| **Unit Testing & Mocking** | Service business logic, algorithms, state | Complete isolation using test doubles (mocks, stubs) | **Perera H.L.P.S.**<br>`IT24101848` | Service-level business rule validation, parameterized tests, boundary conditions, and exception recovery. |
+| **UI / End-to-End (E2E) Testing** | User interface & service integrations | Headless browser execution against running SUT | **H.R.M.A.A. Bandara**<br>`IT24100315` | Automated browser tests, customer journey verification (auth, menu, orders, reservations where supported), and UI regression. |
+| **Load & Performance Testing** | Public endpoints & microservice APIs | Synthetic virtual user concurrency | **D.M.N. Presanjith**<br>`IT24101505` | Stress profiles, latency distributions (p90/p95/p99), throughput (RPS), and SLA threshold evaluation. |
+| *Mutation Testing* | *Unit test assertions & mutants* | *Synthetic fault injection* | *Unassigned (Exploratory)* | *Preserved in folder structure for potential future exploration; not an assessed individual scope.* |
+| **CI/CD Pipeline Orchestration** | Entire repository testing workflow | GitHub Actions hosted runners | **Shared Group Requirement**<br>*(Led by Wijesinghe K)* | Automated pipeline trigger on PR/push, stage execution, unified report aggregation, and artifact archiving. |
 
 ---
 
 ## 5. Artifact & Report Management
 
-All testing tools are configured to output machine-readable and human-readable reports to the centralized `test-reports/` directory.
+All testing tools are configured to output results to the centralized `test-reports/` directory.
 
-During CI execution in GitHub Actions:
-1. Each job writes test outcomes (e.g., JUnit XML, lcov coverage, HTML dashboards).
-2. The CI pipeline bundles these outputs into persistent downloadable workflow artifacts.
-3. Quality gates evaluate coverage and pass/fail thresholds before signaling merge readiness.
-
+### Target Reporting Architecture (Planned Implementation)
+1. **Quality Checks**: Static analysis results, security audit logs, and code quality summaries (`test-reports/quality/`).
+2. **Unit Tests**: Test execution logs, JUnit XML output, and LCOV/JaCoCo coverage reports (`test-reports/unit/`).
+3. **UI / E2E Tests**: Test execution summaries, failure screenshots, and execution trace videos (`test-reports/e2e/`).
+4. **Load Tests**: Performance summaries, latency percentiles, and k6 JSON results (`test-reports/load/`).
+5. **CI Aggregation**: The GitHub Actions pipeline aggregates all reports and uploads them as persistent workflow artifacts upon pipeline completion.
