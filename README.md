@@ -8,34 +8,36 @@
 
 This repository hosts the centralized **Automated Testing & Quality Assurance Pipeline** developed for **SE3112: Advanced Software Engineering**. 
 
-It builds upon the microservice ecosystem engineered during the **SE3022 Cinnamon Bistro Cloud Services Platform (CSP)** project. While the core application repository manages the business logic, API gateways, and domain services, this repository serves as a dedicated, decoupled quality engineering harness designed to test, validate, benchmark, and enforce software resilience across the distributed architecture.
+It builds upon the microservice ecosystem designed during the **SE3022 Cinnamon Bistro Cloud Services Platform (CSP)** project. While the core application repository manages operational services, domain logic, and persistent storage, this repository serves as a dedicated, decoupled quality engineering harness to validate, benchmark, and enforce software resilience across the distributed system.
 
 ---
 
 ## 2. Purpose & Objectives of Automated Quality Assurance
 
-In modern distributed microservice architectures like Cinnamon Bistro, manual testing and ad-hoc verification are insufficient for ensuring reliability, fault tolerance, and predictable performance. 
+In modern distributed microservice architectures like Cinnamon Bistro, manual testing and ad-hoc verification are insufficient for ensuring reliability, data integrity, and strict SLA compliance. 
 
 Implementing an automated quality assurance framework achieves the following critical engineering objectives:
-- **Shift-Left Quality**: Identify regression bugs, logical flaws, and edge-case exceptions early in the development lifecycle before reaching staging or production.
-- **Continuous Feedback**: Provide instantaneous feedback on pull requests and commits to maintain a healthy build status across all microservice boundaries.
-- **Fault Tolerance & Resilience Verification**: Systematically evaluate how services degrade under simulated network partitions, service outages, and invalid payloads.
-- **Code Health & Mutability**: Prevent false confidence from raw line coverage by executing mutation testing to guarantee assertion efficacy.
-- **Performance Profiling**: Benchmark SLA compliance, throughput, latency distributions, and concurrency limits under heavy transactional loads.
+- **Shift-Left Quality**: Identify regression bugs, logical flaws, and edge cases early in the development lifecycle before deployment.
+- **Continuous Feedback**: Provide automated feedback on pull requests and commits to maintain a healthy build status across all service boundaries.
+- **Service Isolation & Contract Verification**: Validate business logic and component interactions independently using mock objects and contract boundaries.
+- **Real-World User Journey Validation**: Verify end-to-end customer workflows through automated UI and integration flows.
+- **Performance & Capacity Profiling**: Benchmark SLA compliance, throughput, latency distributions (p90/p95/p99), and concurrency limits under heavy transactional loads.
+- **Code Quality & Metric Visibility**: Enforce uniform coding standards, static analysis rules, and test coverage thresholds via automated pipeline gates.
 
 ---
 
-## 3. Testing Categories & Target Scope
+## 3. Testing Categories & Assessment Scope
 
-The testing repository is modularized into distinct testing strategies, each addressing specific layers of the testing pyramid and quality engineering standards:
+For **SE3112**, the testing strategy is structured into **four distinct individually assessed testing areas**, supported by a **shared group CI/CD automation pipeline**:
 
-| Category | Directory | Description & Target Scope |
-| :--- | :--- | :--- |
-| **Unit Testing** | [`unit-tests/`](unit-tests/) | Isolated component and class-level tests validating business rules, calculations, and domain entities with mocked external dependencies. |
-| **Mutation Testing** | [`mutation-tests/`](mutation-tests/) | Fault-injection suite measuring test quality by introducing syntactic mutants to verify test suite fault-detection capabilities. |
-| **Load & Performance Testing** | [`load-tests/`](load-tests/) | Simulation of concurrent user workloads, peak-hour orders, stress limits, endurance, and spike profiles against API endpoints. |
-| **End-to-End (E2E) Testing** | [`e2e-tests/`](e2e-tests/) | Integrated user journeys spanning API Gateway, authentication, ordering, inventory, billing, and notification microservices. |
-| **Quality Checks & Static Analysis** | [`quality-checks/`](quality-checks/) | Static code analysis, security scanning, linting, formatting enforcement, and dependency vulnerability audits. |
+| Testing Area | Repository Directory | Ownership Classification | Individual / Lead Owner | Primary Scope & Objectives |
+| :--- | :--- | :--- | :--- | :--- |
+| **Code Quality & Metrics** | [`quality-checks/`](quality-checks/) | **Individual Area 1** | **Wijesinghe K**<br>`IT24102587` | Static code analysis, linters, code complexity metrics, security audits, and quality gate enforcement. |
+| **UI / End-to-End (E2E) Testing** | [`e2e-tests/`](e2e-tests/) | **Individual Area 2** | **H.R.M.A.A. Bandara**<br>`IT24100315` | Automated frontend/UI testing, realistic customer workflows (auth, menu, orders, reservations where supported), positive & negative scenarios. |
+| **Unit Testing & Mocking** | [`unit-tests/`](unit-tests/) | **Individual Area 3** | **Perera H.L.P.S.**<br>`IT24101848` | Service-level unit tests, parameterized tests, test doubles (mocks/stubs), business rules, boundary values, and exception paths. |
+| **Load & Performance Testing** | [`load-tests/`](load-tests/) | **Individual Area 4** | **D.M.N. Presanjith**<br>`IT24101505` | Endpoint performance testing, concurrency and workload profiling, response times, throughput (RPS), and failure rate thresholds. |
+| **Test Automation Pipeline** | [`.github/workflows/`](.github/workflows/) | **Shared Group Requirement** | **Wijesinghe K** *(Lead)*<br>*(All Members Contribute)* | Unified CI/CD workflow orchestration, automated test stage execution, artifact publishing, and PR status checks. |
+| *Mutation Testing* | [`mutation-tests/`](mutation-tests/) | *Exploratory / Unassigned* | *None (Reserved)* | Retained in directory structure for potential exploration; **not** an individually assessed scope nor a completed group deliverable. |
 
 ---
 
@@ -45,45 +47,53 @@ The testing repository is modularized into distinct testing strategies, each add
 .
 ├── .github/
 │   └── workflows/
-│       └── testing-pipeline.yml   # CI/CD automated workflow definition
+│       └── testing-pipeline.yml   # Staged GitHub Actions CI workflow skeleton
 ├── docs/
-│   ├── architecture.md            # System under test & test harness architecture
-│   ├── testing-plan.md            # Test strategy, metrics, and execution plans
-│   └── team-contribution.md       # Team responsibilities, branch policies & matrix
-├── e2e-tests/                     # Integration and End-to-End workflow tests
-├── load-tests/                    # Load, stress, and performance test suites
-├── mutation-tests/                # Mutation testing configuration and test suites
-├── quality-checks/                # Linters, security scanners, and static checks
-├── scripts/                       # Automation scripts for setup and execution
-│   └── README.md                  # Script catalogue and usage instructions
-├── test-reports/                  # Output directory for test results and coverage
-├── unit-tests/                    # Isolated unit test suites
-├── .gitignore                     # Git ignore rules for reports, logs, dependencies
-└── README.md                      # Project documentation and guidelines
+│   ├── architecture.md            # SUT architecture, testing harness design & ownership
+│   ├── testing-plan.md            # Detailed QA plan for the 4 testing areas & quality gates
+│   └── team-contribution.md       # Team responsibilities, RACI matrix & demo evidence
+├── e2e-tests/                     # UI and End-to-End workflow tests (Owned by H.R.M.A.A. Bandara)
+├── load-tests/                    # Load and performance test suites (Owned by D.M.N. Presanjith)
+├── mutation-tests/                # Reserved / exploratory testing directory (Not individually assigned)
+├── quality-checks/                # Linters, security scans & quality metrics (Owned by Wijesinghe K)
+├── scripts/                       # Automation and runner helper scripts
+│   └── README.md                  # Script guidelines, standards and planned utilities
+├── test-reports/                  # Consolidated test execution and coverage outputs
+├── unit-tests/                    # Isolated unit tests and mocks (Owned by Perera H.L.P.S.)
+├── .gitignore                     # Git ignore rules for reports, logs, and dependencies
+└── README.md                      # Project overview, team roles & documentation hub
 ```
 
 ---
 
 ## 5. Team Contributions & Governance
 
-Quality assurance across the microservice suite is collaboratively owned by the engineering team. Individual contributions, branch workflows, and review standards are managed under strict pair programming and code review policies.
+### 5.1 Official Team Roster & Individual Ownership
 
-| Team Member | Role / Focus Area | Primary Responsibilities |
-| :--- | :--- | :--- |
-| *[Member 1 Name / Student ID]* | Quality Engineering Lead | CI/CD Pipeline, Quality Gates & Architecture |
-| *[Member 2 Name / Student ID]* | Functional Testing Specialist | Unit Testing & Mutation Testing Framework |
-| *[Member 3 Name / Student ID]* | Integration Testing Specialist | Microservice E2E & Contract Testing |
-| *[Member 4 Name / Student ID]* | Performance & Security Engineer | Load, Stress Testing & Vulnerability Checks |
+In accordance with SE3112 guidelines, each team member owns exactly one distinct individual testing area. The overall CI/CD pipeline is a shared collaborative responsibility, coordinated by the Group Leader.
 
-For detailed contribution guidelines, branch conventions, and grading accountability records, refer to [`docs/team-contribution.md`](docs/team-contribution.md).
+| Student Name | Student Registration No. | Individual Testing Area | Additional Group Role | Core Responsibilities |
+| :--- | :--- | :--- | :--- | :--- |
+| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader / Pipeline Lead** | GitHub repository & branch management, CI/CD orchestration, static analysis configuration, quality gate thresholds, unified reporting, and group demo coordination. |
+| **H.R.M.A.A. Bandara** | `IT24100315` | **UI / End-to-End (E2E) Testing** | QA Engineer (UI/E2E) | Automated frontend testing, customer journey verification (authentication, menu, ordering, reservations where supported), positive/negative UI scenarios, and E2E demo evidence. |
+| **Perera H.L.P.S.** | `IT24101848` | **Unit Testing & Mocking** | QA Engineer (Unit/Mocking) | Service-level unit tests, parameterized test suites, test doubles (mocks/stubs), business rule validation, exception handling tests, and unit execution evidence. |
+| **D.M.N. Presanjith** | `IT24101505` | **Load & Performance Testing** | QA Engineer (Performance) | Microservice endpoint load testing, realistic concurrency and workload profiles, latency (p90/p95/p99), throughput, error rate analysis, and performance demo evidence. |
+
+### 5.2 Governance & Quality Collaboration
+- **Shared Group Responsibility**: The GitHub Actions CI/CD pipeline integrates all four individual testing components into a cohesive automated workflow. Every member is responsible for ensuring their test suite passes within the CI environment.
+- **Individual Accountability**: Each member is independently assessed on their designated testing area, including test design, implementation quality, CI execution, and demonstration evidence.
+- For complete branching policies, Conventional Commit standards, RACI matrix, and individual demonstration guidelines, refer to [`docs/team-contribution.md`](docs/team-contribution.md).
 
 ---
 
-## 6. Execution & Getting Started (Foundation Phase)
+## 6. Implementation Status & Getting Started
 
-> **Note**: This repository currently establishes the initial architectural and CI/CD foundation. Test implementations and runner scripts will be populated in subsequent iterations in alignment with the [Testing Plan](docs/testing-plan.md).
+> **Current Status: Foundation & Planning Phase**  
+> The repository foundation, directory structure, documentation, and GitHub Actions workflow skeleton are in place. Individual test implementations, test fixtures, and execution scripts will be developed incrementally according to the [Testing Plan](docs/testing-plan.md). No actual test cases are executed or claimed to pass at this stage.
 
-To inspect the pipeline and repository documentation:
-- Architecture Overview: [`docs/architecture.md`](docs/architecture.md)
-- Testing Master Plan: [`docs/testing-plan.md`](docs/testing-plan.md)
-- Pipeline Definition: [`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)
+To explore project specifications and architecture:
+- **System & Test Architecture**: [`docs/architecture.md`](docs/architecture.md)
+- **Quality Assurance Master Plan**: [`docs/testing-plan.md`](docs/testing-plan.md)
+- **Team Ownership & RACI Matrix**: [`docs/team-contribution.md`](docs/team-contribution.md)
+- **Script Guidelines & Standards**: [`scripts/README.md`](scripts/README.md)
+- **CI/CD Workflow Skeleton**: [`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)
