@@ -88,12 +88,17 @@ In accordance with SE3112 guidelines, each team member owns exactly one distinct
 
 ## 6. Implementation Status & Getting Started
 
-> **Current Status: Foundation & Planning Phase**  
-> The repository foundation, directory structure, documentation, and GitHub Actions workflow skeleton are in place. Individual test implementations, test fixtures, and execution scripts will be developed incrementally according to the [Testing Plan](docs/testing-plan.md). No actual test cases are executed or claimed to pass at this stage.
+> **Current Status: Phase 1 Operational (Code Quality & CI Pipeline Foundation)**
+>
+> - **CI/CD Integration**: The shared GitHub Actions pipeline ([`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)) checks out this testing repository alongside the original CSP repository from its `develop` branch into an ephemeral `target-app/` directory.
+> - **Code Quality & Metrics**: Phase 1 static analysis is active under [`quality-checks/`](quality-checks/). It enforces frontend ESLint checks, backend .NET compilation & static analysis, advisory formatting checks, and dependency vulnerability audits.
+> - **Individual Testing Areas**: Downstream test suites (Unit Testing, UI/E2E Testing, Load Testing) are preserved with clear placeholder jobs, scheduled for Phase 2 implementation by their respective student owners.
+> - **Mutation Testing**: Preserved as an unassigned/exploratory directory; not claimed as an assessed or completed group requirement.
 
-To explore project specifications and architecture:
+To explore project specifications and execution:
+- **Code Quality Harness**: [`quality-checks/README.md`](quality-checks/README.md)
+- **CI/CD Pipeline Definition**: [`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)
 - **System & Test Architecture**: [`docs/architecture.md`](docs/architecture.md)
 - **Quality Assurance Master Plan**: [`docs/testing-plan.md`](docs/testing-plan.md)
 - **Team Ownership & RACI Matrix**: [`docs/team-contribution.md`](docs/team-contribution.md)
 - **Script Guidelines & Standards**: [`scripts/README.md`](scripts/README.md)
-- **CI/CD Workflow Skeleton**: [`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)

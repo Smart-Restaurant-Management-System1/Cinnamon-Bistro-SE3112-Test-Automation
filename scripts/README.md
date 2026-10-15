@@ -37,7 +37,8 @@ As the test framework evolves, the following automation utilities will be implem
 
 ---
 
-## 4. Current Status
+## 4. Current Status (Phase 1 Operational)
 
-> **Foundation Phase**: No custom execution scripts are implemented yet. As test suites in `unit-tests/`, `e2e-tests/`, and other modules are created, corresponding execution scripts will be added here.
+- **Code Quality & Metrics Harness**: Operational runners are provided in [`quality-checks/run-quality-checks.sh`](../quality-checks/run-quality-checks.sh) (Bash/CI) and [`quality-checks/run-quality-checks.ps1`](../quality-checks/run-quality-checks.ps1) (PowerShell).
+- **Test Orchestration Scripts**: Master runners (`run-all-tests`, environment setups) will be added as downstream test suites (`unit-tests/`, `e2e-tests/`, `load-tests/`) are implemented by their respective team owners in Phase 2.
 
