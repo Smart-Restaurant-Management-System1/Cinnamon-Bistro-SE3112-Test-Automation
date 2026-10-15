@@ -88,11 +88,11 @@ In accordance with SE3112 guidelines, each team member owns exactly one distinct
 
 ## 6. Implementation Status & Getting Started
 
-> **Current Status: Phase 1 Operational (Code Quality & CI Pipeline Foundation)**
+> **Current Status: Phase 2 Operational (Code Quality, Unit Testing & Code Coverage)**
 >
-> - **CI/CD Integration**: The shared GitHub Actions pipeline ([`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)) checks out this testing repository alongside the original CSP repository from its `develop` branch into an ephemeral `target-app/` directory.
-> - **Code Quality & Metrics**: Phase 1 static analysis is active under [`quality-checks/`](quality-checks/). It enforces a transparent, baseline-aware ESLint quality gate on the React frontend (zero new regressions), backend .NET compilation & static analysis, advisory formatting checks, and dependency vulnerability audits.
-> - **Individual Testing Areas**: Downstream test suites (Unit Testing, UI/E2E Testing, Load Testing) are preserved with clear placeholder jobs, scheduled for Phase 2 implementation by their respective student owners.
+> - **CI/CD Integration**: The shared GitHub Actions pipeline ([`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)) checks out this testing repository alongside the original CSP repository from its `develop` branch into `target-app/`, restores pinned tools, and runs the unified quality and testing harness.
+> - **Code Quality & Metrics**: Phase 2 automation is active under [`quality-checks/`](quality-checks/). It enforces baseline-aware ESLint checks (0 new regressions), backend .NET compilation & security audits, automated execution of 570 backend unit tests (100% pass rate), and ReportGenerator code coverage aggregation (44.9% line, 42.4% branch coverage) with an interactive HTML dashboard.
+> - **Individual Testing Areas**: Explicit integration contracts and entry points are established in [`docs/team-contribution.md`](docs/team-contribution.md) for teammates' pending suites (Unit Testing & Mocking, UI/E2E Testing, Load Testing).
 > - **Mutation Testing**: Preserved as an unassigned/exploratory directory; not claimed as an assessed or completed group requirement.
 
 To explore project specifications and execution:

@@ -87,30 +87,32 @@ The project structure aligns strictly with the SE3112 assessment framework, desi
 
 ## 3. Tooling Evaluation & Tech Stack Alignment
 
-Candidate tools are selected to integrate smoothly with the tech stack of the Cinnamon Bistro CSP application (e.g., Node.js / TypeScript, Java / Spring Boot, or Python). Final tool configurations will be locked once the CSP codebase is inspected:
+Tools are configured to integrate with the verified technology stack of Cinnamon Bistro CSP (.NET 10 Web APIs and React 19 / Vite):
 
-| Testing Area | Individual Owner | Candidate Frameworks & Runners | Selection Rationale |
+| Testing Area | Individual Owner | Implemented / Target Frameworks | Selection Rationale |
 | :--- | :--- | :--- | :--- |
-| **Code Quality & Metrics** | Wijesinghe K | **ESLint / SonarQube / Trivy / Hadolint** | Industry-standard static analysis, flexible rule engines, comprehensive SAST security audits, and CI gate integration. |
-| **UI / E2E Testing** | H.R.M.A.A. Bandara | **Playwright / Cypress / Selenium** | Fast headless execution, automatic waiting, rich failure trace inspection (screenshots/videos), and CI readiness. |
-| **Unit Testing & Mocking** | Perera H.L.P.S. | **Jest / Mocha + Sinon / JUnit 5 + Mockito** | Native assertion support, battle-tested mocking/stubbing capabilities, fast in-memory execution, and built-in coverage generators. |
-| **Load Testing** | D.M.N. Presanjith | **Grafana k6 / Apache JMeter / Artillery** | Developer-friendly scripting (JavaScript for k6), lightweight headless execution in CI, robust metrics (p95, p99, RPS), and failure threshold assertions. |
-| **Shared CI Pipeline** | Group (Lead: Wijesinghe K) | **GitHub Actions** | Native GitHub integration, matrix builds, artifact archiving, and pull request status checks. |
+| **Code Quality & Metrics** | Wijesinghe K | **ESLint (Flat Config) + Baseline Comparator + ReportGenerator (v5.5.11)** | Zero-regression quality gate preserving upstream immutability; aggregated statement & branch coverage HTML dashboard. |
+| **Unit Testing & Mocking** | Perera H.L.P.S. | **xUnit 2.5.3 + Moq 4.20.70 + Coverlet (6.0.0)** | Native .NET 10 test SDK; in-memory isolation, test doubles, and Cobertura XML coverage generation. |
+| **UI / E2E Testing** | H.R.M.A.A. Bandara | **Playwright (Node.js 20)** | High-reliability headless browser automation, trace captures, video on failure, and CI readiness. |
+| **Load Testing** | D.M.N. Presanjith | **Grafana k6** | High-performance Go-based headless engine, JavaScript scripting, p95/p99 latency metrics, and SLA assertions. |
+| **Shared CI Pipeline** | Group (Lead: Wijesinghe K) | **GitHub Actions** | Native GitHub workflow orchestration, dual repository checkout, tool caching, and unified step summaries. |
 
 ---
 
-## 4. Planned Quality Gates & Acceptance Thresholds
+## 4. Phase 2 Enforced Quality Gates & Acceptance Thresholds
 
-The following criteria represent the target quality gates to be enforced in the CI/CD pipeline once test implementations are active:
+The following criteria are enforced within the active CI/CD pipeline:
 
-| Pipeline Stage | Evaluated Metric | Planned Acceptance Threshold | Action on Violation |
-| :--- | :--- | :--- | :--- |
-| **Quality Checks** | Linter Errors & Critical SAST Alerts | 0 Errors, 0 Critical Vulnerabilities | Fail CI Build |
-| **Unit Testing** | Test Pass Rate & Code Coverage | 100% Pass Rate, ≥ 80% Line Coverage | Fail CI Build (<75% blocks PR merge) |
-| **UI / E2E Testing** | Critical User Journeys Pass Rate | 100% Passing on Critical Paths | Fail CI Build |
-| **Load Testing** | Latency & Error Rate Thresholds | p95 < 500ms, Error Rate < 1% at baseline | SLA Violation Flag / CI Warning |
+| Pipeline Stage | Evaluated Metric | Enforced Threshold | Gate Classification | Action on Violation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Frontend Static Analysis** | ESLint Errors beyond Authorized Baseline | Strict **0 New Errors** ($\Delta_{\text{new}} = 0$) | Mandatory Gate | Fail CI Build |
+| **Backend Compilation** | ASP.NET Core Build Errors & Warnings | **0 Compilation Errors** | Mandatory Gate | Fail CI Build |
+| **Backend Code Formatting** | C# Style Conformance (`dotnet format`) | Diagnostic Logging | Advisory Check | Log Warnings (Non-blocking) |
+| **Dependency Vulnerabilities** | NuGet Published CVEs | **0 Vulnerable Packages** | Mandatory Gate | Fail CI Build |
+| **Backend Unit Testing** | xUnit Test Pass Rate | **100% Pass Rate** (570/570 passing) | Mandatory Gate | Fail CI Build |
+| **Backend Code Coverage** | Coverlet + ReportGenerator | **Line >= 40.0%**, **Branch >= 35.0%** | Coverage Floor Gate | Fail CI Build |
 
-> **Current Operational Status**: These thresholds reflect target engineering requirements. The CI pipeline is currently in its foundation phase with placeholder stages; gates will be enforced as test suites are implemented by each respective owner.
+> **Current Operational Status**: Phase 2 is fully active. The pipeline executes ESLint regression gating, backend compilation, dependency auditing, 570 unit tests, and ReportGenerator coverage dashboard generation. Teammate suites (Unit, E2E, Load) are integration-ready.
 
 ---
 

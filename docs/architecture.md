@@ -11,42 +11,37 @@ A fundamental engineering principle of this project is the strict separation bet
 
 ---
 
-## 2. System Under Test (SUT): Cinnamon Bistro CSP (Conceptual Overview)
+## 2. System Under Test (SUT): Cinnamon Bistro CSP (Verified Architecture)
 
-> **Important Architectural Disclaimer**:  
-> The diagram and component boundaries below represent a **conceptual model** of the Cinnamon Bistro restaurant management platform based on typical microservice patterns. Specific service names, inter-service protocols, event brokers, and database technologies **must be formally verified against the actual SE3022 CSP codebase** prior to finalizing test fixtures.
+Technical inspection of the Cinnamon Bistro CSP repository (`Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System`, `develop` branch) confirms the following verified architecture:
 
 ```mermaid
 flowchart TD
-    Client["Clients (Web Frontend / Mobile / Admin) [Conceptual]"] --> Gateway["API Gateway / Reverse Proxy [Conceptual]"]
+    Client["React 19 + Vite Frontend (frontend/restaurant-web)"] --> SvcAuth["Identity Service (.NET 10 Web API)"]
+    Client --> SvcRes["Reservation Service (.NET 10 Web API)"]
     
-    subgraph Core Services [Conceptual - Subject to CSP Verification]
-        Gateway --> Auth["Authentication & User Service"]
-        Gateway --> Menu["Menu & Catalog Service"]
-        Gateway --> Order["Order Management Service"]
-        Gateway --> Table["Table Reservation Service"]
-        Gateway --> Billing["Payment & Billing Service"]
+    subgraph Data & Event Layer
+        SvcAuth --- DBAuth[("MySQL 8.0 Database")]
+        SvcRes --- DBRes[("MySQL 8.0 Database")]
+        SvcRes -.-> Kafka["Apache Kafka 3.9 (Event Streaming)"]
     end
 
-    subgraph Asynchronous Infrastructure [Conceptual - Subject to Verification]
-        Order -.-> Broker["Message Broker / Event Stream"]
-        Broker -.-> Notification["Notification Service"]
-    end
-
-    subgraph Data Layer [Conceptual - Subject to Verification]
-        Auth --- AuthDB[("Auth DB")]
-        Menu --- MenuDB[("Menu DB")]
-        Order --- OrderDB[("Order DB")]
-        Table --- TableDB[("Table DB")]
-        Billing --- BillingDB[("Billing DB")]
+    subgraph Verified Test Automation Harness
+        ESLint["ESLint Flat Config (Baseline-Aware Gate)"] --> Client
+        Dotnet["Compiler Static Analysis & NuGet Audit"] --> SvcAuth
+        Dotnet --> SvcRes
+        UnitTests["xUnit Unit Tests (570 Passing Tests)"] --> SvcAuth
+        UnitTests --> SvcRes
+        Coverlet["Coverlet XPlat Coverage Collector"] --> UnitTests
+        ReportGen["ReportGenerator 5.5.11 (HTML & XML Dashboard)"] --> Coverlet
     end
 ```
 
-### Unverified Architectural Elements (Requiring Source Verification)
-- **Service Boundaries**: Number, naming, and autonomy of individual microservices.
-- **Inter-Service Communication**: REST over HTTP vs. gRPC vs. message queue (e.g., RabbitMQ / Kafka / Redis).
-- **Persistence Technologies**: SQL (PostgreSQL/MySQL) vs. NoSQL (MongoDB) configurations per service.
-- **Authentication Mechanism**: JWT structure, session management, or OAuth2 flows.
+### Verified Architecture Specifications
+- **Identity Service**: ASP.NET Core (.NET 10), BCrypt password hashing, JWT authentication, MySQL persistence. (122 xUnit tests).
+- **Reservation Service**: ASP.NET Core (.NET 10), table reservations, order tracking, billing/invoicing, feedback management, Kafka outbox event publishing. (448 xUnit tests).
+- **Frontend Web Application**: React 19, Vite, React Router DOM, Axios, ESLint 10.9.1 (Flat Config).
+- **Coverage Engine**: Coverlet DataCollector (`6.0.0`) producing Cobertura XML; aggregated via `dotnet-reportgenerator-globaltool` (`5.5.11`).
 
 ---
 

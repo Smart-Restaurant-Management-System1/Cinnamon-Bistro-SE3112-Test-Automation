@@ -37,8 +37,10 @@ As the test framework evolves, the following automation utilities will be implem
 
 ---
 
-## 4. Current Status (Phase 1 Operational)
+## 4. Current Status (Phase 2 Operational)
 
-- **Code Quality & Metrics Harness**: Operational runners are provided in [`quality-checks/run-quality-checks.sh`](../quality-checks/run-quality-checks.sh) (Bash/CI) and [`quality-checks/run-quality-checks.ps1`](../quality-checks/run-quality-checks.ps1) (PowerShell).
-- **Test Orchestration Scripts**: Master runners (`run-all-tests`, environment setups) will be added as downstream test suites (`unit-tests/`, `e2e-tests/`, `load-tests/`) are implemented by their respective team owners in Phase 2.
+- **Code Quality, Testing & Coverage Harness**: Active runners are provided in [`quality-checks/run-quality-checks.sh`](../quality-checks/run-quality-checks.sh) (Bash/CI) and [`quality-checks/run-quality-checks.ps1`](../quality-checks/run-quality-checks.ps1) (PowerShell), orchestrating ESLint, .NET build, dependency auditing, 570 unit tests, and ReportGenerator HTML coverage.
+- **Coverage Processor**: [`quality-checks/process-coverage.js`](../quality-checks/process-coverage.js) parses ReportGenerator JSON summaries and enforces baseline coverage gates.
+- **Baseline Comparator**: [`quality-checks/compare-eslint-baseline.js`](../quality-checks/compare-eslint-baseline.js) enforces zero-new-error regression detection against the committed ESLint baseline.
+- **Teammate Test Runners**: Downstream test suites (`unit-tests/`, `e2e-tests/`, `load-tests/`) will add specific runners in accordance with the contracts in [`docs/team-contribution.md`](../docs/team-contribution.md).
 

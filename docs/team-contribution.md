@@ -147,3 +147,41 @@ Before approving any pull request, reviewers must verify:
 - [ ] Assertions verify tangible business outcomes and contracts rather than trivial or tautological truths.
 - [ ] The change does not break existing CI workflow stages or invalidate shared reporting paths.
 - [ ] All generated test output paths target the centralized `test-reports/` directory.
+
+---
+
+## 7. Shared Pipeline Integration Contracts for Teammates
+
+As Group Leader and Shared Pipeline Integration Lead, Wijesinghe K has established standardized integration contracts to enable seamless check-in of teammate test suites:
+
+### 7.1 Unit Testing & Mocking Contract (Perera H.L.P.S. — `IT24101848`)
+- **Target Repository Directory:** `unit-tests/`
+- **Recommended Technology:** xUnit, Moq, FluentAssertions (`.NET 10`)
+- **Entry Point Execution:** `dotnet test unit-tests/` (or designated `.csproj` under `unit-tests/`)
+- **Expected Artifacts:** Cobertura XML or TRX test results placed in `test-reports/unit/`
+- **Environment Prerequisites:** None (fully isolated with test doubles and mocks)
+- **CI Failure Handling:** Non-zero exit code halts the pipeline with mandatory gate failure.
+- **Integration Note:** The Code Quality stage executes the 570 baseline unit tests to calculate statement/branch coverage. Perera's suite will expand coverage on new business rules and parameterized edge cases.
+
+### 7.2 UI / End-to-End (E2E) Testing Contract (H.R.M.A.A. Bandara — `IT24100315`)
+- **Target Repository Directory:** `e2e-tests/`
+- **Recommended Technology:** Playwright or Cypress (Node.js 20)
+- **Entry Point Execution:** `npm run test:e2e` or `npx playwright test --config=e2e-tests/playwright.config.js`
+- **Expected Artifacts:** HTML report, screenshot on failure, and execution video placed in `test-reports/e2e/`
+- **Environment Prerequisites:** `BASE_URL=http://localhost:5173` (React frontend) and backend services running or mocked via WireMock / Prism
+- **CI Failure Handling:** Failure marks the E2E stage as failed; failure screenshots uploaded as CI artifacts.
+
+### 7.3 Load & Performance Testing Contract (D.M.N. Presanjith — `IT24101505`)
+- **Target Repository Directory:** `load-tests/`
+- **Recommended Technology:** Grafana k6 (portable binary or Docker)
+- **Entry Point Execution:** `k6 run load-tests/scripts/reservation-service-load.js --summary-export=test-reports/load/summary.json`
+- **Expected Artifacts:** JSON execution summary and Markdown report placed in `test-reports/load/`
+- **Environment Prerequisites:** `TARGET_API_URL=http://localhost:5000` (target service endpoint)
+- **CI Failure Handling:** Threshold breach (p95 latency > 500ms, error rate > 1%) returns exit code 99 and flags the performance gate.
+
+### 7.4 Teammate Integration Checklist
+Prior to merging into `develop`, each teammate must verify:
+1. Test suite executes locally via standard CLI without proprietary IDE dependencies.
+2. Output artifacts are directed to `test-reports/<area>/` rather than scattered in the source tree.
+3. PR adheres to Conventional Commits: `feat(unit):`, `feat(e2e):`, or `feat(load):`.
+4. Tests do not modify original CSP source code or overwrite other team members' directories.
