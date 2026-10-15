@@ -1,4 +1,4 @@
-# Code Quality & Metrics Harness (Phase 1)
+# Code Quality, Testing & Metrics Harness (Phase 2)
 
 **Individual Testing Area 1:** Code Quality & Metrics  
 **Responsible Owner:** Wijesinghe K (`IT24102587`) — Group Leader & Quality Lead  
@@ -8,20 +8,26 @@
 
 ## 1. Overview & Objectives
 
-The `quality-checks/` module implements automated static code analysis, code hygiene verification, baseline-aware regression gating, and dependency security audits for the Cinnamon Bistro microservice ecosystem.
+The `quality-checks/` module implements automated static code analysis, code hygiene verification, baseline-aware regression gating, dependency vulnerability auditing, automated backend unit testing, and statement/branch code coverage measurement for the Cinnamon Bistro microservice ecosystem.
 
-As part of the Phase 1 implementation, this harness establishes an objective, transparent quality gate that runs as the initial stage in the CI/CD pipeline, catching structural bugs, syntax errors, and supply-chain vulnerabilities before downstream testing jobs execute.
+As part of the **Phase 2 implementation**, this module integrates:
+1. Automated execution of 570 backend xUnit unit tests across `identity-service` and `reservation-service`.
+2. Coverlet XPlat Code Coverage data collection with explicit assembly filtering.
+3. Consolidated HTML coverage reporting and XML artifact generation via version-pinned ReportGenerator (`5.5.11`).
+4. An automated code coverage quality gate enforcing baseline floors (40.0% line coverage, 35.0% branch coverage) to prevent regressions.
 
 ---
 
-## 2. Implemented Quality Checks & Gate Classifications
+## 2. Implemented Quality & Testing Gates (Phase 2)
 
-| Check Category | Target Component | Tool / Engine | Gate Classification | Evaluation Policy |
-| :--- | :--- | :--- | :--- | :--- |
-| **Frontend Static Analysis** | React 19 / Vite Web App (`frontend/restaurant-web`) | ESLint (Flat Config via `eslint.config.js`) + Baseline Comparator | **Baseline-Aware Regression Gate** | **Strict 0 New Errors** beyond authorized baseline. Historical debt is transparently reported. |
-| **Backend Static Analysis & Build** | ASP.NET Core Web APIs (`backend/*/*.csproj`) | `dotnet build` with compiler static analysis | **Mandatory Gate** | Fails CI job on compilation or semantic errors (0 errors required). |
-| **Backend Code Formatting** | C# Source Files | `dotnet format --verify-no-changes` | **Advisory Check** | Non-blocking style diagnostics logged (avoids rejecting baseline code). |
-| **Dependency Security Audit** | NuGet Dependencies | `dotnet list package --vulnerable` | **Mandatory Gate** | Fails CI job on known vulnerable dependencies (0 CVEs required). |
+| Stage # | Check Category | Target Component | Tool / Engine | Gate Classification | Evaluation Policy |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| **1** | **Frontend Static Analysis** | React 19 / Vite Web App (`frontend/restaurant-web`) | ESLint (Flat Config) + Baseline Comparator | **Baseline-Aware Regression Gate** | **Strict 0 New Errors** beyond authorized baseline. 129 historical findings transparently disclosed. |
+| **2** | **Backend Static Analysis & Build** | ASP.NET Core Web APIs (`backend/*/*.csproj`) | `dotnet build` (Release) with compiler analyzers | **Mandatory Gate** | Fails CI job on compilation or semantic errors (0 errors required). |
+| **3** | **Backend Code Formatting** | C# Source Files | `dotnet format --verify-no-changes` | **Advisory Check** | Non-blocking style diagnostics logged (avoids rejecting baseline code). |
+| **4** | **Dependency Security Audit** | NuGet Dependencies | `dotnet list package --vulnerable` | **Mandatory Gate** | Fails CI job on known vulnerable dependencies (0 CVEs required). |
+| **5** | **Backend Automated Unit Tests** | xUnit Test Suites (`tests/unit/*/*.csproj`) | `dotnet test` (Release) | **Mandatory Gate** | **100% Test Pass Rate**: All 570 unit tests must pass (0 failures). |
+| **6** | **Backend Automated Code Coverage** | ASP.NET Core Microservices | Coverlet + ReportGenerator (`5.5.11`) | **Coverage Floor Gate** | Enforces minimum baseline floor: **Line >= 40.0%**, **Branch >= 35.0%**. |
 
 ---
 
@@ -48,78 +54,94 @@ To maintain testing pipeline integrity without modifying original application co
 4. **Stable Finding Identity & Multiset Frequency Matching**:
    Findings are tracked using a composite identity key:
    $$\text{Signature} = \text{NormalizedFilePath} \mathbin{::} \text{RuleId} \mathbin{::} \text{PrimaryMessage}$$
-   - Line and column numbers are excluded from the identity key to prevent line drift (e.g. adding a comment on line 1 does not flag existing issues on lines 50-100 as new regressions).
-   - Findings sharing identical keys within a file (e.g. two separate `setState` calls in the same component) are tracked using **multiset frequency counts**. If $\text{CurrentCount} > \text{BaselineCount}$, the excess count is flagged as a new regression.
+   - Line and column numbers are excluded from the identity key to prevent line drift.
+   - Findings sharing identical keys within a file are tracked using **multiset frequency counts**. If $\text{CurrentCount} > \text{BaselineCount}$, the excess count is flagged as a new regression.
 5. **Dual Evaluation Reporting**:
-   - **Clean Lint Status**: Evaluates whether zero total errors and warnings exist in the codebase. Accurately reports `FAILED (Historical baseline findings present)` until upstream technical debt is remediated.
-   - **Regression Gate Status**: Evaluates whether $\Delta_{\text{new errors}} = 0$. Reports `PASSED (Zero new errors introduced)` if no new violations are introduced, or `FAILED (New regressions detected)` if 1+ new errors appear.
-
-### 3.3 Authorized Baseline Provenance
-The authorized baseline is stored in [`quality-checks/baselines/eslint-baseline.json`](baselines/eslint-baseline.json):
-- **Upstream Repository:** `Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System`
-- **Target Branch:** `develop`
-- **Baseline Commit SHA:** `ee41765622ac458399bd208171d930dcb6a070a9`
-- **ESLint Version:** `10.9.1` (Flat Config)
-- **Total Cataloged Findings:** 129 (40 errors, 89 warnings across 57 files)
+   - **Clean Lint Status**: Evaluates whether zero total errors and warnings exist in the codebase (`FAILED` due to historical baseline).
+   - **Regression Gate Status**: Evaluates whether $\Delta_{\text{new errors}} = 0$ (`PASSED` when zero new errors are introduced).
 
 ---
 
-## 4. Scripts & Execution
+## 4. Backend Automated Unit Testing & Code Coverage (Phase 2)
 
-### 4.1 Script Inventory
-- `quality-checks/compare-eslint-baseline.js`: Portable Node.js baseline comparator and quality gate evaluator.
-- `quality-checks/run-quality-checks.sh`: Cross-platform Bash runner for CI/CD and Linux/macOS environments.
-- `quality-checks/run-quality-checks.ps1`: Native PowerShell runner for Windows developer environments.
+### 4.1 Actual Unit Test Execution Results
+The quality harness discovers and executes all existing backend unit test projects under `tests/unit/`:
 
-### 4.2 Local Execution
+| Test Project | Target Service | Framework | Total Tests | Passed | Failed | Skipped |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `identity-service-tests.csproj` | `backend/identity-service` | xUnit 2.5.3 / Moq 4.20.70 | 122 | 122 | 0 | 0 |
+| `reservation-service-tests.csproj` | `backend/reservation-service` | xUnit 2.5.3 / Moq 4.20.70 | 448 | 448 | 0 | 0 |
+| **Combined Backend Total** | **Both Services** | **xUnit + Coverlet** | **570** | **570** | **0** | **0** |
 
-#### Linux / macOS / Git Bash:
-```bash
-# Run against local target directory or default reference repo
-bash quality-checks/run-quality-checks.sh [optional-target-path]
-```
+### 4.2 Measured Code Coverage Metrics
+Collected via `coverlet.collector` and aggregated using `dotnet-reportgenerator-globaltool` (v5.5.11):
 
-#### Windows PowerShell:
+| Coverage Dimension | Combined Baseline | `identity-service` | `reservation-service` | Quality Gate Threshold | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Line Coverage** | **44.9%** (1,478 / 3,288) | **46.6%** (227 / 487) | **44.6%** (1,251 / 2,801) | Baseline Floor: **>= 40.0%** | **PASSED** |
+| **Branch Coverage** | **42.4%** (393 / 926) | **33.6%** (35 / 104) | **43.6%** (358 / 822) | Baseline Floor: **>= 35.0%** | **PASSED** |
+| **Method Coverage** | **58.6%** (179 / 305) | **73.1%** (30 / 41) | **56.4%** (149 / 264) | Advisory Diagnostic | INFORMATIONAL |
+| **Tested Code Volume** | **1,478 lines** | 227 lines | 1,251 lines | Verified Executable Volume | MEASURED |
+| **Untested Code Gap** | **1,810 lines** | 260 lines | 1,550 lines | Technical Debt Disclosure | MEASURED |
+
+### 4.3 Assembly Inclusion & Exclusion Settings
+Configured via [`quality-checks/coverlet.runsettings`](coverlet.runsettings):
+- **Included Assemblies:** `[identity-service]*`, `[reservation-service]*`
+- **Excluded Assemblies:** `[*tests*]*` (unit test assemblies), `[xunit*]*`, `[Moq*]*`
+- **Excluded Code:** `[*]*.Migrations.*` (EF Core database migrations), `[CompilerGeneratedAttribute]`, `[GeneratedCodeAttribute]`
+
+---
+
+## 5. Scripts & Tooling Inventory
+
+- `quality-checks/coverlet.runsettings`: Runsettings configuration enforcing assembly inclusions and exclusions.
+- `quality-checks/compare-eslint-baseline.js`: Portable Node.js baseline comparator and regression gate evaluator.
+- `quality-checks/process-coverage.js`: Node.js processor for ReportGenerator `Summary.json`, enforcing coverage floors.
+- `quality-checks/run-quality-checks.ps1`: Windows PowerShell harness runner.
+- `quality-checks/run-quality-checks.sh`: Linux / CI/CD POSIX Bash harness runner.
+- `.config/dotnet-tools.json`: Pinned local tool manifest for `dotnet-reportgenerator-globaltool` (v5.5.11).
+
+---
+
+## 6. Local Execution Guide
+
+### On Windows PowerShell:
 ```powershell
-# Run against local target directory or default reference repo
+# Restore pinned tools
+dotnet tool restore
+
+# Execute full Phase 2 harness against reference repository
 powershell -ExecutionPolicy Bypass -File .\quality-checks\run-quality-checks.ps1 -TargetDir "..\Cinnamon-Bistro-CSP-Reference"
 ```
 
-#### Direct Baseline Comparator Usage:
+### On Linux / macOS / Git Bash:
 ```bash
-# Evaluate existing results against baseline
-node quality-checks/compare-eslint-baseline.js \
-  --results test-reports/quality/eslint-results.json \
-  --baseline quality-checks/baselines/eslint-baseline.json \
-  --summary test-reports/quality/eslint-summary.md
+# Restore pinned tools
+dotnet tool restore
 
-# Regenerate authorized baseline (maintenance mode)
-node quality-checks/compare-eslint-baseline.js \
-  --results test-reports/quality/eslint-results.json \
-  --baseline quality-checks/baselines/eslint-baseline.json \
-  --generate-baseline
+# Execute full Phase 2 harness
+bash quality-checks/run-quality-checks.sh [optional-target-path]
+```
+
+### Viewing the Interactive HTML Coverage Dashboard:
+Open the generated HTML report in your default browser:
+```powershell
+# Windows
+Start-Process "test-reports/coverage/reports/index.html"
+
+# Linux
+xdg-open test-reports/coverage/reports/index.html
 ```
 
 ---
 
-## 5. Generated Artifacts & Reports
+## 7. Generated Artifacts & Reports
 
-Execution results are automatically output to `test-reports/quality/`:
-- `quality-summary.md`: Consolidated quality gate report, automatically appended to `$GITHUB_STEP_SUMMARY`.
-- `eslint-summary.md`: Detailed breakdown of historical baseline findings, new regressions, resolved issues, and rule distributions.
-- `eslint-results.json`: Full structured JSON artifact output directly by ESLint.
-- `frontend-lint.log`: Raw CLI standard error output from the ESLint process.
-- `backend-build.log`: Detailed compiler diagnostic log from `dotnet restore` and `dotnet build`.
-- `backend-format.log`: Detailed formatting diagnostics from `dotnet format --verify-no-changes`.
-- `backend-vulnerabilities.log`: Vulnerability scan output from `dotnet list package --vulnerable`.
-
----
-
-## 6. Verification & Test Scenarios
-
-The baseline-aware harness has been verified against 5 key operational scenarios:
-1. **Scenario 1 — Authorized Baseline Run**: Evaluated against the reference CSP repository (`develop` branch). All 129 findings match the baseline; zero new errors; pipeline exits with code `0` (`PASSED`).
-2. **Scenario 2 — Synthetic Regression Injection**: Injected 1 new error (`no-undef` on `src/App.jsx`). The comparator accurately flags 1 new regression, marks Regression Gate as `FAILED`, and exits with code `1`.
-3. **Scenario 3 — Missing Baseline File**: When the baseline path does not exist, the comparator halts with a clear `[FATAL]` diagnostic and exits with code `1`.
-4. **Scenario 4 — Corrupt Results JSON**: When the ESLint results file contains invalid JSON or truncated output, the comparator halts with a clear `[FATAL]` diagnostic and exits with code `1`.
-5. **Scenario 5 — Missing Dependencies**: When executed against a target directory lacking `node_modules`, the harness aborts with a clear directive to execute `npm ci` and exits with code `1`.
+Results are deterministically written to `test-reports/`:
+- `test-reports/quality/quality-summary.md`: Consolidated summary of all 6 quality and testing stages.
+- `test-reports/quality/eslint-summary.md`: ESLint findings breakdown by rule and regression delta.
+- `test-reports/coverage/coverage-summary.md`: Formatted coverage tables, microservice breakdowns, and gate status.
+- `test-reports/coverage/reports/index.html`: Human-readable interactive HTML coverage dashboard.
+- `test-reports/coverage/reports/Cobertura.xml`: Aggregated machine-readable Cobertura XML report.
+- `test-reports/coverage/reports/Summary.json`: Structured coverage metrics JSON.
+- `test-reports/quality/*.log`: Raw execution logs (`frontend-lint.log`, `backend-build.log`, `backend-format.log`, `backend-vulnerabilities.log`, `backend-tests.log`, `backend-coverage.log`).
