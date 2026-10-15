@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - feature/code-quality-ci-pipeline
   pull_request:
     branches:
       - main
@@ -20,7 +21,7 @@ jobs:
     name: Verify Repository Foundation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Testing Repository
         uses: actions/checkout@v4
 
       - name: Validate Repository Layout
@@ -43,77 +44,115 @@ jobs:
           echo "=========================================================="
 
   quality-checks:
-    name: Quality Checks & Static Analysis
+    name: Code Quality & Metrics (Phase 1)
     needs: foundation-check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout SE3112 Testing Repository
         uses: actions/checkout@v4
 
-      - name: Static Analysis Placeholder
+      - name: Checkout Cinnamon Bistro CSP Application
+        uses: actions/checkout@v4
+        with:
+          repository: Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System
+          ref: develop
+          path: target-app
+
+      - name: Setup .NET SDK (10.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: target-app/frontend/restaurant-web/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: target-app/frontend/restaurant-web
+        run: npm ci
+
+      - name: Execute Code Quality & Metrics Harness
         run: |
-          echo "[PHASE 1] Static Code Analysis & Linting"
-          echo "Ready for linter and SAST security scanner configurations."
+          chmod +x quality-checks/run-quality-checks.sh
+          bash quality-checks/run-quality-checks.sh target-app
+
+      - name: Upload Quality Reports & Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: test-reports/quality/
+          if-no-files-found: ignore
 
   unit-tests:
-    name: Unit Testing Suite
-    needs: foundation-check
+    name: Unit Testing & Mocking (Perera H.L.P.S. - Pending Phase 2)
+    needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Unit Tests Placeholder
+      - name: Log Pending Phase 2 Status
         run: |
-          echo "[PHASE 2] Unit Testing Execution"
-          echo "Ready for unit test harness and mock runner integration."
+          echo "=============================================================================="
+          echo " [PENDING] Unit Testing & Mocking Suite"
+          echo " Individual Owner: Perera H.L.P.S. (IT24101848)"
+          echo " Target Scope: Service-level unit tests, parameterized tests, and test doubles"
+          echo " Status: Scheduled for Phase 2 implementation."
+          echo "=============================================================================="
 
   mutation-tests:
-    name: Mutation Testing Suite
+    name: Mutation Testing (Reserved / Unassigned Scope)
     needs: unit-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Mutation Tests Placeholder
+      - name: Log Reserved Scope Status
         run: |
-          echo "[PHASE 3] Mutation Testing Execution"
-          echo "Ready for mutation testing engine (e.g. Stryker/Pitest) integration."
+          echo "=============================================================================="
+          echo " [NOTICE] Mutation Testing Suite (Exploratory / Unassigned)"
+          echo " Status: Mutation testing is preserved as an optional exploratory directory"
+          echo "         but is NOT one of the 4 individually assessed scopes for SE3112."
+          echo "         Not claimed as an implemented group requirement."
+          echo "=============================================================================="
 
   e2e-tests:
-    name: End-to-End & Integration Testing
-    needs: unit-tests
+    name: UI / End-to-End Testing (H.R.M.A.A. Bandara - Pending Phase 2)
+    needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: E2E Tests Placeholder
+      - name: Log Pending Phase 2 Status
         run: |
-          echo "[PHASE 4] End-to-End Scenario Execution"
-          echo "Ready for container orchestration and API journey tests."
+          echo "=============================================================================="
+          echo " [PENDING] UI / End-to-End Testing Suite"
+          echo " Individual Owner: H.R.M.A.A. Bandara (IT24100315)"
+          echo " Target Scope: Automated frontend customer journeys, positive & negative flows"
+          echo " Status: Scheduled for Phase 2 implementation."
+          echo "=============================================================================="
 
   load-tests:
-    name: Load & Performance Testing
-    needs: unit-tests
+    name: Load & Performance Testing (D.M.N. Presanjith - Pending Phase 2)
+    needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Load Tests Placeholder
+      - name: Log Pending Phase 2 Status
         run: |
-          echo "[PHASE 5] Load & Performance Benchmarking"
-          echo "Ready for k6 / performance workload scripts."
+          echo "=============================================================================="
+          echo " [PENDING] Load & Performance Testing Suite"
+          echo " Individual Owner: D.M.N. Presanjith (IT24101505)"
+          echo " Target Scope: Endpoint load testing, concurrency profiles, latency percentiles"
+          echo " Status: Scheduled for Phase 2 implementation."
+          echo "=============================================================================="
 
   publish-reports:
-    name: Aggregate & Publish Test Reports
+    name: Consolidated Pipeline Summary
     needs: [quality-checks, unit-tests, mutation-tests, e2e-tests, load-tests]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Summary Placeholder
+      - name: Publish Pipeline Summary Notice
         run: |
-          echo "Consolidated test reports and coverage outputs ready for artifact aggregation."
-
+          echo "=============================================================================="
+          echo " [PIPELINE STAGE COMPLETE] Phase 1: Code Quality & CI Integration"
+          echo " Code Quality & Metrics checks executed successfully."
+          echo " Downstream test suites (Unit, E2E, Load) are preserved for Phase 2."
+          echo "=============================================================================="

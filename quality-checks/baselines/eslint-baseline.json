@@ -1,0 +1,1062 @@
+{
+  "metadata": {
+    "repository": "Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System",
+    "branch": "develop",
+    "commitSha": "ee41765622ac458399bd208171d930dcb6a070a9",
+    "eslintVersion": "10.9.1",
+    "eslintConfig": "eslint.config.js",
+    "generatedAt": "2026-10-15T10:49:58.046Z",
+    "generator": "SE3112 Baseline-Aware Quality Gate (Wijesinghe K - IT24102587)"
+  },
+  "summary": {
+    "totalFilesAnalyzed": 123,
+    "filesWithIssues": 57,
+    "totalErrors": 40,
+    "totalWarnings": 89,
+    "totalFindings": 129,
+    "ruleDistribution": {
+      "no-unused-vars": 74,
+      "react-hooks/set-state-in-effect": 28,
+      "react-refresh/only-export-components": 2,
+      "react-hooks/immutability": 2,
+      "react-hooks/exhaustive-deps": 13,
+      "no-useless-assignment": 1,
+      "no-empty": 1,
+      "no-undef": 8
+    }
+  },
+  "findings": [
+    {
+      "signatureKey": "src/App.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/App.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/auth/Login.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/auth/Login.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/auth/Register.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/auth/Register.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/auth/Register.jsx::no-unused-vars::'validateRegisterEmail' is defined but never used.",
+      "filePath": "src/components/auth/Register.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'validateRegisterEmail' is defined but never used.",
+      "initialLine": 5
+    },
+    {
+      "signatureKey": "src/components/billing/OrderInvoiceModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/billing/OrderInvoiceModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/common/AppLayout.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/common/AppLayout.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/common/ConfirmationModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/common/ConfirmationModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/common/LogoutModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/common/LogoutModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/common/PageHeader.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/common/PageHeader.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/common/Sidebar.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/common/Sidebar.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 4
+    },
+    {
+      "signatureKey": "src/components/common/Sidebar.jsx::no-unused-vars::'preOrderIcon' is assigned a value but never used.",
+      "filePath": "src/components/common/Sidebar.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'preOrderIcon' is assigned a value but never used.",
+      "initialLine": 233
+    },
+    {
+      "signatureKey": "src/components/common/TopBar.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/common/TopBar.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/common/TopBar.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/components/common/TopBar.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 27
+    },
+    {
+      "signatureKey": "src/components/landing/LandingFeatures.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/landing/LandingFeatures.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/landing/LandingNav.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/landing/LandingNav.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/landing/LandingNav.jsx::react-refresh/only-export-components::Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+      "filePath": "src/components/landing/LandingNav.jsx",
+      "ruleId": "react-refresh/only-export-components",
+      "severity": "warning",
+      "primaryMessage": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+      "initialLine": 5
+    },
+    {
+      "signatureKey": "src/components/payment/PaymentModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/payment/PaymentModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/reservations/AddTableModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/reservations/AddTableModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/reservations/AddTableModal.jsx::react-hooks/immutability::Error: Cannot access variable before it is declared",
+      "filePath": "src/components/reservations/AddTableModal.jsx",
+      "ruleId": "react-hooks/immutability",
+      "severity": "error",
+      "primaryMessage": "Error: Cannot access variable before it is declared",
+      "initialLine": 32
+    },
+    {
+      "signatureKey": "src/components/reservations/AddTableModal.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array.",
+      "filePath": "src/components/reservations/AddTableModal.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array.",
+      "initialLine": 42
+    },
+    {
+      "signatureKey": "src/components/reservations/BookTableModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/reservations/BookTableModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/reservations/BookTableModal.jsx::no-unused-vars::'bookingConflictMessage' is defined but never used.",
+      "filePath": "src/components/reservations/BookTableModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'bookingConflictMessage' is defined but never used.",
+      "initialLine": 3
+    },
+    {
+      "signatureKey": "src/components/reservations/BookTableModal.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/components/reservations/BookTableModal.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 32
+    },
+    {
+      "signatureKey": "src/components/reservations/EditTableModal.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/components/reservations/EditTableModal.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/components/reservations/EditTableModal.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/components/reservations/EditTableModal.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 32
+    },
+    {
+      "signatureKey": "src/components/reservations/EditTableModal.jsx::react-hooks/immutability::Error: Cannot access variable before it is declared",
+      "filePath": "src/components/reservations/EditTableModal.jsx",
+      "ruleId": "react-hooks/immutability",
+      "severity": "error",
+      "primaryMessage": "Error: Cannot access variable before it is declared",
+      "initialLine": 48
+    },
+    {
+      "signatureKey": "src/components/reservations/EditTableModal.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array.",
+      "filePath": "src/components/reservations/EditTableModal.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'handleClose'. Either include it or remove the dependency array.",
+      "initialLine": 58
+    },
+    {
+      "signatureKey": "src/context/AuthContext.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/context/AuthContext.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/context/AuthContext.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/context/AuthContext.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 18
+    },
+    {
+      "signatureKey": "src/context/AuthContext.jsx::react-refresh/only-export-components::Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+      "filePath": "src/context/AuthContext.jsx",
+      "ruleId": "react-refresh/only-export-components",
+      "severity": "warning",
+      "primaryMessage": "Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.",
+      "initialLine": 93
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::no-unused-vars::'useMemo' is defined but never used.",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'useMemo' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::no-unused-vars::'downloadAuditLogsCsv' is defined but never used.",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'downloadAuditLogsCsv' is defined but never used.",
+      "initialLine": 10
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::no-unused-vars::'IconFilter' is assigned a value but never used.",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'IconFilter' is assigned a value but never used.",
+      "initialLine": 51
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 250
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'fetchLogs'. Either include it or remove the dependency array.",
+      "initialLine": 251
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminAuditLogsPage.jsx::no-useless-assignment::The value assigned to 'parsed' is not used in subsequent statements.",
+      "filePath": "src/pages/admin/AdminAuditLogsPage.jsx",
+      "ruleId": "no-useless-assignment",
+      "severity": "error",
+      "primaryMessage": "The value assigned to 'parsed' is not used in subsequent statements.",
+      "initialLine": 1157
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminDashboardPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminDashboardPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminDashboardPage.jsx::no-unused-vars::'user' is assigned a value but never used.",
+      "filePath": "src/pages/admin/AdminDashboardPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'user' is assigned a value but never used.",
+      "initialLine": 10
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminDashboardPage.jsx::no-unused-vars::'logout' is assigned a value but never used.",
+      "filePath": "src/pages/admin/AdminDashboardPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'logout' is assigned a value but never used.",
+      "initialLine": 10
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminDashboardPage.jsx::no-unused-vars::'navigate' is assigned a value but never used.",
+      "filePath": "src/pages/admin/AdminDashboardPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'navigate' is assigned a value but never used.",
+      "initialLine": 11
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminDashboardPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminDashboardPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 147
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminDashboardPage.jsx::no-unused-vars::'inactiveCount' is assigned a value but never used.",
+      "filePath": "src/pages/admin/AdminDashboardPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'inactiveCount' is assigned a value but never used.",
+      "initialLine": 170
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminFeedbackPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminFeedbackPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminFeedbackPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminFeedbackPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 184
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminFeedbackPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminFeedbackPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 188
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminOperationalDashboardPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminOperationalDashboardPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminOperationalDashboardPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminOperationalDashboardPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 71
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminOperationalDashboardPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has missing dependencies: 'dateRange' and 'fetchData'. Either include them or remove the dependency array.",
+      "filePath": "src/pages/admin/AdminOperationalDashboardPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has missing dependencies: 'dateRange' and 'fetchData'. Either include them or remove the dependency array.",
+      "initialLine": 72
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminOrdersPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminOrdersPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminOrdersPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminOrdersPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 40
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminOrdersPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has missing dependencies: 'filters' and 'load'. Either include them or remove the dependency array.",
+      "filePath": "src/pages/admin/AdminOrdersPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has missing dependencies: 'filters' and 'load'. Either include them or remove the dependency array.",
+      "initialLine": 41
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminPaymentsPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminPaymentsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminPaymentsPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminPaymentsPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 52
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminReservationsPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminReservationsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminReservationsPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminReservationsPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 27
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminReservationsPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has missing dependencies: 'filters' and 'load'. Either include them or remove the dependency array.",
+      "filePath": "src/pages/admin/AdminReservationsPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has missing dependencies: 'filters' and 'load'. Either include them or remove the dependency array.",
+      "initialLine": 28
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminUserManagementPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/AdminUserManagementPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminUserManagementPage.jsx::no-unused-vars::'setPageSize' is assigned a value but never used.",
+      "filePath": "src/pages/admin/AdminUserManagementPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'setPageSize' is assigned a value but never used.",
+      "initialLine": 121
+    },
+    {
+      "signatureKey": "src/pages/admin/AdminUserManagementPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/AdminUserManagementPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 185
+    },
+    {
+      "signatureKey": "src/pages/admin/MenuManagementPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/MenuManagementPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/MenuManagementPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/MenuManagementPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 46
+    },
+    {
+      "signatureKey": "src/pages/admin/MenuManagementPage.jsx::no-unused-vars::'user' is assigned a value but never used.",
+      "filePath": "src/pages/admin/MenuManagementPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'user' is assigned a value but never used.",
+      "initialLine": 107
+    },
+    {
+      "signatureKey": "src/pages/admin/MenuManagementPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/MenuManagementPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 156
+    },
+    {
+      "signatureKey": "src/pages/admin/MenuManagementPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'loadMenuItems'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/admin/MenuManagementPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'loadMenuItems'. Either include it or remove the dependency array.",
+      "initialLine": 157
+    },
+    {
+      "signatureKey": "src/pages/admin/ReservationReportsPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/admin/ReservationReportsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/admin/ReservationReportsPage.jsx::no-unused-vars::'Link' is defined but never used.",
+      "filePath": "src/pages/admin/ReservationReportsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'Link' is defined but never used.",
+      "initialLine": 2
+    },
+    {
+      "signatureKey": "src/pages/admin/ReservationReportsPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/admin/ReservationReportsPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 74
+    },
+    {
+      "signatureKey": "src/pages/admin/ReservationReportsPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'loadReport'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/admin/ReservationReportsPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'loadReport'. Either include it or remove the dependency array.",
+      "initialLine": 75
+    },
+    {
+      "signatureKey": "src/pages/admin/adminOperationalDashboard.test.js::no-unused-vars::'getDatePreset' is defined but never used.",
+      "filePath": "src/pages/admin/adminOperationalDashboard.test.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'getDatePreset' is defined but never used.",
+      "initialLine": 5
+    },
+    {
+      "signatureKey": "src/pages/admin/adminTableManagement.test.js::no-unused-vars::'validateTableEditForm' is defined but never used.",
+      "filePath": "src/pages/admin/adminTableManagement.test.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'validateTableEditForm' is defined but never used.",
+      "initialLine": 4
+    },
+    {
+      "signatureKey": "src/pages/availability/AvailabilitySearchPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/availability/AvailabilitySearchPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationConfirmationPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/availability/ReservationConfirmationPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationDetailPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/availability/ReservationDetailPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationDetailPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/availability/ReservationDetailPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 169
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationDetailPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'fail'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/availability/ReservationDetailPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'fail'. Either include it or remove the dependency array.",
+      "initialLine": 175
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationHistoryPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/availability/ReservationHistoryPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationHistoryPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/availability/ReservationHistoryPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 451
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationHistoryPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'load'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/availability/ReservationHistoryPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'load'. Either include it or remove the dependency array.",
+      "initialLine": 452
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationReschedulePage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/availability/ReservationReschedulePage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/availability/ReservationReviewPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/availability/ReservationReviewPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/common/LandingPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/common/LandingPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/common/UnauthorizedPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/common/UnauthorizedPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerCartPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/CustomerCartPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerCartPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/CustomerCartPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 141
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerCartPage.jsx::no-unused-vars::'result' is defined but never used.",
+      "filePath": "src/pages/customer/CustomerCartPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'result' is defined but never used.",
+      "initialLine": 1995
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerFeedbackPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/CustomerFeedbackPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerFeedbackPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/CustomerFeedbackPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 125
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerMenuPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/CustomerMenuPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 2
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerMenuPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/CustomerMenuPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 231
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerMenuPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/CustomerMenuPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 351
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerMenuPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'loadCustomerMenu'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/customer/CustomerMenuPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'loadCustomerMenu'. Either include it or remove the dependency array.",
+      "initialLine": 352
+    },
+    {
+      "signatureKey": "src/pages/customer/CustomerPortalPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/CustomerPortalPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/LoginPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/LoginPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/NotificationsPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/NotificationsPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/NotificationsPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/NotificationsPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 58
+    },
+    {
+      "signatureKey": "src/pages/customer/OrderReviewPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/OrderReviewPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/OrderTrackingPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/OrderTrackingPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/OrderTrackingPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/OrderTrackingPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 432
+    },
+    {
+      "signatureKey": "src/pages/customer/OrderTrackingPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/OrderTrackingPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 440
+    },
+    {
+      "signatureKey": "src/pages/customer/ProfilePage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/ProfilePage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/ProfilePage.jsx::no-unused-vars::'useRef' is defined but never used.",
+      "filePath": "src/pages/customer/ProfilePage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'useRef' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/ProfilePage.jsx::no-unused-vars::'Link' is defined but never used.",
+      "filePath": "src/pages/customer/ProfilePage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'Link' is defined but never used.",
+      "initialLine": 2
+    },
+    {
+      "signatureKey": "src/pages/customer/ProfilePage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'updateUser'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/customer/ProfilePage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'updateUser'. Either include it or remove the dependency array.",
+      "initialLine": 80
+    },
+    {
+      "signatureKey": "src/pages/customer/RegisterPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/RegisterPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/ReservationPreOrderPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/customer/ReservationPreOrderPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/customer/ReservationPreOrderPage.jsx::react-hooks/exhaustive-deps::React Hook useEffect has a missing dependency: 'selectedReservationId'. Either include it or remove the dependency array.",
+      "filePath": "src/pages/customer/ReservationPreOrderPage.jsx",
+      "ruleId": "react-hooks/exhaustive-deps",
+      "severity": "warning",
+      "primaryMessage": "React Hook useEffect has a missing dependency: 'selectedReservationId'. Either include it or remove the dependency array.",
+      "initialLine": 174
+    },
+    {
+      "signatureKey": "src/pages/customer/ReservationPreOrderPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/customer/ReservationPreOrderPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 177
+    },
+    {
+      "signatureKey": "src/pages/customer/profileValidation.js::no-unused-vars::'phoneRegex' is assigned a value but never used.",
+      "filePath": "src/pages/customer/profileValidation.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'phoneRegex' is assigned a value but never used.",
+      "initialLine": 7
+    },
+    {
+      "signatureKey": "src/pages/kitchen/KitchenQueuePage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/kitchen/KitchenQueuePage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 2
+    },
+    {
+      "signatureKey": "src/pages/kitchen/KitchenQueuePage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/kitchen/KitchenQueuePage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 918
+    },
+    {
+      "signatureKey": "src/pages/tables/ActiveTablesPage.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/pages/tables/ActiveTablesPage.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/pages/tables/ActiveTablesPage.jsx::react-hooks/set-state-in-effect::Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "filePath": "src/pages/tables/ActiveTablesPage.jsx",
+      "ruleId": "react-hooks/set-state-in-effect",
+      "severity": "error",
+      "primaryMessage": "Error: Calling setState synchronously within an effect can trigger cascading renders",
+      "initialLine": 37
+    },
+    {
+      "signatureKey": "src/routes/AppRoutes.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/routes/AppRoutes.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 3
+    },
+    {
+      "signatureKey": "src/routes/ProtectedRoute.jsx::no-unused-vars::'React' is defined but never used.",
+      "filePath": "src/routes/ProtectedRoute.jsx",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'React' is defined but never used.",
+      "initialLine": 1
+    },
+    {
+      "signatureKey": "src/routes/routeProtection.test.js::no-unused-vars::'ROLES' is defined but never used.",
+      "filePath": "src/routes/routeProtection.test.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'ROLES' is defined but never used.",
+      "initialLine": 4
+    },
+    {
+      "signatureKey": "src/routes/routeProtection.test.js::no-unused-vars::'ALL_ROLES' is defined but never used.",
+      "filePath": "src/routes/routeProtection.test.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'ALL_ROLES' is defined but never used.",
+      "initialLine": 4
+    },
+    {
+      "signatureKey": "src/routes/routeProtection.test.js::no-unused-vars::'hasAnyRole' is defined but never used.",
+      "filePath": "src/routes/routeProtection.test.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'hasAnyRole' is defined but never used.",
+      "initialLine": 4
+    },
+    {
+      "signatureKey": "src/services/cartOrderValidation.test.js::no-unused-vars::'calculateItemSubtotal' is defined but never used.",
+      "filePath": "src/services/cartOrderValidation.test.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'calculateItemSubtotal' is defined but never used.",
+      "initialLine": 9
+    },
+    {
+      "signatureKey": "src/services/paymentService.js::no-unused-vars::'_' is defined but never used.",
+      "filePath": "src/services/paymentService.js",
+      "ruleId": "no-unused-vars",
+      "severity": "warning",
+      "primaryMessage": "'_' is defined but never used.",
+      "initialLine": 183
+    },
+    {
+      "signatureKey": "src/services/paymentService.js::no-empty::Empty block statement.",
+      "filePath": "src/services/paymentService.js",
+      "ruleId": "no-empty",
+      "severity": "error",
+      "primaryMessage": "Empty block statement.",
+      "initialLine": 183
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'process' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'process' is not defined.",
+      "initialLine": 4
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'process' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'process' is not defined.",
+      "initialLine": 5
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'fetch' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'fetch' is not defined.",
+      "initialLine": 6
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'WebSocket' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'WebSocket' is not defined.",
+      "initialLine": 7
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'clearTimeout' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'clearTimeout' is not defined.",
+      "initialLine": 20
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'setTimeout' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'setTimeout' is not defined.",
+      "initialLine": 31
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'setTimeout' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'setTimeout' is not defined.",
+      "initialLine": 41
+    },
+    {
+      "signatureKey": "tests/landing.browser.mjs::no-undef::'console' is not defined.",
+      "filePath": "tests/landing.browser.mjs",
+      "ruleId": "no-undef",
+      "severity": "error",
+      "primaryMessage": "'console' is not defined.",
+      "initialLine": 56
+    }
+  ]
+}
