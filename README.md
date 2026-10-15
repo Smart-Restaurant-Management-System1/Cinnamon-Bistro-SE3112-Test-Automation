@@ -91,7 +91,7 @@ In accordance with SE3112 guidelines, each team member owns exactly one distinct
 > **Current Status: Phase 1 Operational (Code Quality & CI Pipeline Foundation)**
 >
 > - **CI/CD Integration**: The shared GitHub Actions pipeline ([`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)) checks out this testing repository alongside the original CSP repository from its `develop` branch into an ephemeral `target-app/` directory.
-> - **Code Quality & Metrics**: Phase 1 static analysis is active under [`quality-checks/`](quality-checks/). It enforces frontend ESLint checks, backend .NET compilation & static analysis, advisory formatting checks, and dependency vulnerability audits.
+> - **Code Quality & Metrics**: Phase 1 static analysis is active under [`quality-checks/`](quality-checks/). It enforces a transparent, baseline-aware ESLint quality gate on the React frontend (zero new regressions), backend .NET compilation & static analysis, advisory formatting checks, and dependency vulnerability audits.
 > - **Individual Testing Areas**: Downstream test suites (Unit Testing, UI/E2E Testing, Load Testing) are preserved with clear placeholder jobs, scheduled for Phase 2 implementation by their respective student owners.
 > - **Mutation Testing**: Preserved as an unassigned/exploratory directory; not claimed as an assessed or completed group requirement.
 

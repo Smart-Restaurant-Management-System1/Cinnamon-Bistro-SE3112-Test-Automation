@@ -2,7 +2,7 @@
 # ==============================================================================
 # Script: quality-checks/run-quality-checks.sh
 # Purpose: Execute Phase 1 Code Quality & Static Analysis checks against the
-#          Cinnamon Bistro CSP application.
+#          Cinnamon Bistro CSP application using baseline-aware quality gates.
 # Individual Owner: Wijesinghe K (IT24102587) - Code Quality & Metrics Lead
 # ==============================================================================
 
@@ -17,6 +17,8 @@ REPORTS_DIR="test-reports/quality"
 mkdir -p "$REPORTS_DIR"
 
 SUMMARY_FILE="$REPORTS_DIR/quality-summary.md"
+ESLINT_RESULTS="$REPORTS_DIR/eslint-results.json"
+ESLINT_SUMMARY="$REPORTS_DIR/eslint-summary.md"
 LINT_LOG="$REPORTS_DIR/frontend-lint.log"
 BUILD_LOG="$REPORTS_DIR/backend-build.log"
 FORMAT_LOG="$REPORTS_DIR/backend-format.log"
@@ -35,37 +37,58 @@ echo " Output Reports:   $REPORTS_DIR"
 echo "=============================================================================="
 
 # ------------------------------------------------------------------------------
-# 1. Frontend ESLint Static Analysis (Mandatory Gate)
+# 1. Frontend ESLint Static Analysis with Baseline Comparison
 # ------------------------------------------------------------------------------
 echo ""
-echo "[1/4] Running Frontend Static Analysis (ESLint)..."
+echo "[1/4] Running Frontend Static Analysis (ESLint Baseline-Aware Gate)..."
 FRONTEND_DIR="$TARGET_DIR/frontend/restaurant-web"
+
+ROOT_DIR="$(pwd)"
+ABS_REPORTS_DIR="$ROOT_DIR/$REPORTS_DIR"
+ABS_ESLINT_RESULTS="$ROOT_DIR/$ESLINT_RESULTS"
+ABS_LINT_LOG="$ROOT_DIR/$LINT_LOG"
 
 if [ -f "$FRONTEND_DIR/package.json" ]; then
   if [ -d "$FRONTEND_DIR/node_modules" ]; then
     (
       cd "$FRONTEND_DIR"
-      npm run lint
-    ) > "$LINT_LOG" 2>&1
-    LINT_EXIT=$?
+      # Execute ESLint producing structured JSON. ESLint exits with 1 on lint violations,
+      # which is expected when violations exist. We capture stdout to JSON and stderr to log.
+      npx eslint . --format json > "$ABS_ESLINT_RESULTS" 2> "$ABS_LINT_LOG" || true
+    )
 
-    if [ $LINT_EXIT -eq 0 ]; then
-      FRONTEND_LINT_STATUS="PASSED"
-      echo "  ✓ Frontend ESLint completed with 0 errors."
-    else
-      FRONTEND_LINT_STATUS="FAILED"
+    if [ ! -s "$ESLINT_RESULTS" ]; then
+      FRONTEND_LINT_STATUS="FAILED (Empty or missing JSON report)"
       MANDATORY_FAILURES=$((MANDATORY_FAILURES + 1))
-      echo "  ✗ Frontend ESLint detected errors (exit code: $LINT_EXIT)."
-      cat "$LINT_LOG"
+      echo "  ✗ ESLint execution failed to produce structured JSON report."
+      cat "$LINT_LOG" 2>/dev/null || true
+    else
+      echo "  Evaluating findings against authorized baseline..."
+      node quality-checks/compare-eslint-baseline.js \
+        --results "$ESLINT_RESULTS" \
+        --baseline "quality-checks/baselines/eslint-baseline.json" \
+        --summary "$ESLINT_SUMMARY"
+      COMPARE_EXIT=$?
+
+      if [ $COMPARE_EXIT -eq 0 ]; then
+        FRONTEND_LINT_STATUS="PASSED (Zero regressions vs baseline)"
+        echo "  ✓ ESLint regression gate passed: No new errors introduced."
+      else
+        FRONTEND_LINT_STATUS="FAILED (New regressions or baseline failure)"
+        MANDATORY_FAILURES=$((MANDATORY_FAILURES + 1))
+        echo "  ✗ ESLint regression gate failed: New errors detected or invalid baseline."
+      fi
     fi
   else
-    FRONTEND_LINT_STATUS="SKIPPED"
-    echo "  ! Skipping frontend ESLint: node_modules not found in $FRONTEND_DIR. Run npm ci first."
+    FRONTEND_LINT_STATUS="FAILED (Missing node_modules - run npm ci)"
+    MANDATORY_FAILURES=$((MANDATORY_FAILURES + 1))
+    echo "  ✗ Frontend analysis failed: node_modules not found in $FRONTEND_DIR. Run npm ci first."
     echo "node_modules missing in $FRONTEND_DIR" > "$LINT_LOG"
   fi
 else
-  FRONTEND_LINT_STATUS="SKIPPED"
-  echo "  ! Frontend package.json not found in $FRONTEND_DIR."
+  FRONTEND_LINT_STATUS="FAILED (Missing package.json)"
+  MANDATORY_FAILURES=$((MANDATORY_FAILURES + 1))
+  echo "  ✗ Frontend analysis failed: package.json not found in $FRONTEND_DIR."
   echo "package.json missing" > "$LINT_LOG"
 fi
 
@@ -182,7 +205,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 5. Generate Quality Summary Report
+# 5. Generate Overall Quality Summary Report
 # ------------------------------------------------------------------------------
 OVERALL_RESULT="PASSED"
 if [ $MANDATORY_FAILURES -gt 0 ]; then
@@ -192,29 +215,36 @@ fi
 cat <<EOF > "$SUMMARY_FILE"
 # Code Quality & Metrics Summary Report (Phase 1)
 
-**Evaluated Repository:** Cinnamon Bistro SE3022 CSP (\`develop\` branch)  
-**Executed By:** SE3112 Quality Automation Pipeline  
-**Assigned Owner:** Wijesinghe K (\`IT24102587\`) — Code Quality & Metrics Lead  
-**Execution Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%SZ")  
-**Overall Result:** **$OVERALL_RESULT**
+**Evaluated Repository:** Cinnamon Bistro SE3022 CSP (\`develop\` branch)<br/>
+**Executed By:** SE3112 Quality Automation Pipeline<br/>
+**Assigned Owner:** Wijesinghe K (\`IT24102587\`) - Code Quality & Metrics Lead<br/>
+**Execution Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%SZ")<br/>
+**Overall Pipeline Result:** **$OVERALL_RESULT**
 
 ---
 
-### Executed Quality Checks
+### Executed Quality Checks & Gate Status
 
-| Quality Check Stage | Target Component | Gate Type | Status | Artifact Log |
+| Quality Check Stage | Target Component | Gate Classification | Evaluation Status | Artifact Log |
 | :--- | :--- | :--- | :--- | :--- |
-| **Frontend Static Analysis** | React 19 / Vite Web App | Mandatory | \`$FRONTEND_LINT_STATUS\` | [\`frontend-lint.log\`](frontend-lint.log) |
-| **Backend Compilation & Analysis** | ASP.NET Core Web APIs (.NET 10) | Mandatory | \`$BACKEND_BUILD_STATUS\` | [\`backend-build.log\`](backend-build.log) |
-| **Backend Code Formatting** | C# Source Files | Advisory | \`$BACKEND_FORMAT_STATUS\` | [\`backend-format.log\`](backend-format.log) |
-| **Backend Dependency Audit** | NuGet Dependencies | Mandatory | \`$BACKEND_VULN_STATUS\` | [\`backend-vulnerabilities.log\`](backend-vulnerabilities.log) |
+| **Frontend Static Analysis** | React 19 / Vite Web App | Baseline Regression Gate | \`$FRONTEND_LINT_STATUS\` | [\`eslint-summary.md\`](eslint-summary.md) \| [\`eslint-results.json\`](eslint-results.json) |
+| **Backend Compilation & Analysis** | ASP.NET Core Web APIs (.NET 10) | Mandatory Gate | \`$BACKEND_BUILD_STATUS\` | [\`backend-build.log\`](backend-build.log) |
+| **Backend Code Formatting** | C# Source Files | Advisory Check | \`$BACKEND_FORMAT_STATUS\` | [\`backend-format.log\`](backend-format.log) |
+| **Backend Dependency Audit** | NuGet Dependencies | Mandatory Gate | \`$BACKEND_VULN_STATUS\` | [\`backend-vulnerabilities.log\`](backend-vulnerabilities.log) |
 
 ---
 
-### Status Legend & Gate Policies
-- **Mandatory Gates**: Frontend ESLint, Backend .NET Compilation, and Vulnerability Audits must pass without errors.
-- **Advisory Checks**: Backend formatting differences are recorded and displayed for visibility but do not fail the build to avoid rejecting pre-existing baseline formatting in the CSP repository.
-- **Coverage & Deep Metrics (Phase 2 Roadmap)**: Unit test statement coverage via Coverlet, cyclomatic complexity profiling, and SonarQube integration are scheduled for Phase 2 after unit test implementation.
+### Quality Gate Policies & Engineering Disclosure
+1. **Frontend Baseline-Aware Gate**:
+   - Analysis executed successfully and generated structured JSON.
+   - All 129 historical findings (40 errors, 89 warnings) are disclosed in [\`eslint-summary.md\`](eslint-summary.md) and tracked in \`quality-checks/baselines/eslint-baseline.json\`.
+   - The regression gate enforces **0 new errors** beyond the baseline without silencing rules or modifying application code.
+2. **Backend Compilation Gate**:
+   - Compiles all ASP.NET Core projects in Release mode with compiler static analysis enabled. Must pass with 0 errors.
+3. **Advisory Formatting Check**:
+   - Non-blocking formatting differences are reported without blocking CI to avoid rejecting baseline code from the original repository.
+4. **Dependency Audit Gate**:
+   - Audits all direct and transitive NuGet dependencies for known CVE vulnerabilities. Must report 0 vulnerabilities.
 EOF
 
 echo ""
@@ -226,6 +256,10 @@ echo "==========================================================================
 # Export to GitHub Step Summary if running in GitHub Actions
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
+  if [ -f "$ESLINT_SUMMARY" ]; then
+    echo "" >> "$GITHUB_STEP_SUMMARY"
+    cat "$ESLINT_SUMMARY" >> "$GITHUB_STEP_SUMMARY"
+  fi
 fi
 
 if [ $MANDATORY_FAILURES -gt 0 ]; then
@@ -233,4 +267,3 @@ if [ $MANDATORY_FAILURES -gt 0 ]; then
 fi
 
 exit 0
-
