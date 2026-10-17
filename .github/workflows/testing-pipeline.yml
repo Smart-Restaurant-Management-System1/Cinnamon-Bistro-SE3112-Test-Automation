@@ -7,6 +7,7 @@ on:
       - develop
       - feature/code-quality-ci-pipeline
       - feature/code-coverage-quality-metrics
+      - feature/IT24102587-load-testing-ci-integration
   pull_request:
     branches:
       - main
@@ -137,19 +138,118 @@ jobs:
           echo "=============================================================================="
 
   load-tests:
-    name: Load & Performance Testing (D.M.N. Presanjith - Pending Integration)
+    name: Load & Performance Testing (D.M.N. Presanjith - k6 Smoke Suite)
     needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Log Performance Suite Status
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Cinnamon Bistro CSP Application
+        uses: actions/checkout@v4
+        with:
+          repository: Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System
+          ref: develop
+          path: target-app
+
+      - name: Setup .NET SDK (10.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Grafana k6 (v0.54.0)
+        uses: grafana/setup-k6-action@v1
+        with:
+          k6-version: '0.54.0'
+
+      - name: Start Reservation Microservice (Isolated)
         run: |
           echo "=============================================================================="
-          echo " [INTEGRATION READY] Load & Performance Testing Suite"
-          echo " Assigned Owner: D.M.N. Presanjith (IT24101505)"
-          echo " Target Scope:   Endpoint load testing, concurrency profiles, latency percentiles"
-          echo " Target Folder:  load-tests/"
-          echo " Status:         Awaiting teammate test suite implementation."
+          echo " Starting Reservation Service backend in isolated mode..."
+          echo " Environment: ASPNETCORE_ENVIRONMENT=Development"
+          echo " Disabling Kafka publisher (Kafka__PublisherEnabled=false)"
+          echo " Disabling Order Expiry background worker (OrderExpiry__Enabled=false)"
+          echo " Target Endpoint: http://127.0.0.1:5000/api/tables/availability"
           echo "=============================================================================="
+
+          mkdir -p test-reports/load
+          export ASPNETCORE_ENVIRONMENT=Development
+          export Kafka__PublisherEnabled=false
+          export OrderExpiry__Enabled=false
+          export Logging__EventLog__LogLevel__Default=Critical
+          export ASPNETCORE_URLS="http://127.0.0.1:5000"
+
+          dotnet run --project target-app/backend/reservation-service/reservation-service.csproj --no-launch-profile > test-reports/load/backend.log 2>&1 &
+          BACKEND_PID=$!
+          echo "$BACKEND_PID" > test-reports/load/backend.pid
+          echo "Backend process launched in background (PID: $BACKEND_PID)."
+
+      - name: Await Backend Endpoint Readiness
+        run: |
+          echo "Waiting for reservation service availability endpoint to respond..."
+          READY=false
+          for i in $(seq 1 30); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5000/api/tables/availability || true)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✓ Backend ready and responding HTTP 200 after ${i}s."
+              READY=true
+              break
+            fi
+            echo "  Attempt ${i}/30: HTTP code '$HTTP_CODE'. Retrying in 1s..."
+            sleep 1
+          done
+
+          if [ "$READY" != "true" ]; then
+            echo "✗ Backend failed to start or become responsive within 30 seconds."
+            echo "=== Backend Log Output ==="
+            cat test-reports/load/backend.log 2>/dev/null || true
+            exit 1
+          fi
+
+      - name: Execute k6 Smoke Load Test
+        id: k6_run
+        run: |
+          echo "=============================================================================="
+          echo " Executing k6 smoke test suite against live isolated backend..."
+          echo " Script: load-tests/scripts/smoke.js"
+          echo "=============================================================================="
+
+          export TARGET_URL="http://127.0.0.1:5000/api/tables/availability"
+          k6 run \
+            --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' \
+            --summary-export=test-reports/load/smoke-summary.json \
+            load-tests/scripts/smoke.js 2>&1 | tee test-reports/load/k6-execution.log
+
+      - name: Process Load Testing Metrics & Generate Step Summary
+        if: always()
+        run: |
+          node scripts/process-load-summary.js \
+            --json test-reports/load/smoke-summary.json \
+            --output test-reports/load/load-summary.md \
+            --profile "Smoke Profile (1 VU, 10s)" \
+            --target-url "http://127.0.0.1:5000/api/tables/availability"
+
+      - name: Teardown Isolated Backend Process
+        if: always()
+        run: |
+          if [ -f "test-reports/load/backend.pid" ]; then
+            BACKEND_PID=$(cat test-reports/load/backend.pid)
+            echo "Terminating backend process PID $BACKEND_PID..."
+            kill -9 "$BACKEND_PID" 2>/dev/null || true
+          fi
+
+      - name: Upload Load Testing Reports & Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-testing-reports
+          path: test-reports/load/
+          if-no-files-found: ignore
 
   publish-reports:
     name: Consolidated Pipeline Summary
@@ -160,8 +260,9 @@ jobs:
       - name: Publish Pipeline Summary Notice
         run: |
           echo "=============================================================================="
-          echo " [PIPELINE STAGE COMPLETE] Phase 2: Code Quality, Unit Testing & Coverage"
-          echo " Code Quality & Metrics checks executed successfully."
-          echo " Unit tests passed (570/570) and ReportGenerator HTML dashboard generated."
-          echo " Teammate suites (Unit, E2E, Load) are integration-ready."
+          echo " [PIPELINE STAGE COMPLETE] Automated Testing Pipeline"
+          echo " • Code Quality & Metrics checks executed successfully."
+          echo " • Baseline Unit tests passed (570/570) and ReportGenerator HTML generated."
+          echo " • Load & Performance Testing executed (k6 smoke suite against isolated backend)."
+          echo " • Teammate suites (Unit, E2E) remain pending check-in."
           echo "=============================================================================="
