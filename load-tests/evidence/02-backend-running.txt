@@ -1,0 +1,39 @@
+﻿Backend: Cinnamon Bistro reservation-service
+HTTP probe captured: 2026-10-17 13:02:19 +05:30; service was running
+Target: http://localhost:5000/api/tables/availability
+Runtime controls: Kafka publisher disabled; order-expiry background worker disabled
+Probe command: curl.exe -i --max-time 5 http://localhost:5000/api/tables/availability
+--- HTTP probe ---
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 17 Oct 2026 07:32:19 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{"available":true,"message":"Tables are available for reservation today."}
+curl exit code: 0
+--- ASP.NET Core startup ---
+warn: Microsoft.AspNetCore.DataProtection.Repositories.EphemeralXmlRepository[50]
+      Using an in-memory repository. Keys will not be persisted to storage.
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[59]
+      Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[35]
+      No XML encryptor configured. Key {bb99e294-0f04-4684-9a8e-7507f5754452} may be persisted to storage in unencrypted form.
+info: ReservationService.Services.OutboxPublisherService[0]
+      OutboxPublisher 2f8ea0b5-cb3a-4658-9b55-f1e405d44750 starting. ReservationTopic=restaurant.reservations.v1 OrderLifecycleTopic=order-lifecycle-events Enabled=False
+info: ReservationService.Services.OutboxPublisherService[0]
+      OutboxPublisher disabled by configuration. No events will be published.
+info: ReservationService.Services.OrderExpiryBackgroundService[0]
+      OrderExpiryBackgroundService started. Enabled=False, Interval=2m, Threshold=30m.
+info: ReservationService.Services.OrderExpiryBackgroundService[0]
+      OrderExpiryBackgroundService is disabled by configuration.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\navin\OneDrive\Desktop\Smart-Restaurant-Management-System\backend\reservation-service
+
+

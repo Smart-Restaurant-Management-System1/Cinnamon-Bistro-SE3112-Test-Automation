@@ -1,0 +1,50 @@
+﻿Test: controlled stress
+Started: 2026-10-17 13:00:07 +05:30
+Finished: 2026-10-17 13:01:12 +05:30
+Target: http://localhost:5000/api/tables/availability
+Profile: ramp 1->10->25->40->0 VUs across 65 seconds
+Environment: isolated local ASP.NET Core reservation service; publisher and expiry worker disabled
+--- k6 output ---
+
+
+  █ THRESHOLDS 
+
+    checks
+    ✓ 'rate>0.95' rate=100.00%
+
+    http_req_duration
+    ✓ 'p(95)<1500' p(95)=1.18ms
+
+    http_req_failed
+    ✓ 'rate<0.05' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 7599    116.564344/s
+    checks_succeeded...: 100.00% 7599 out of 7599
+    checks_failed......: 0.00%   0 out of 7599
+
+    ✓ availability endpoint returns HTTP 200
+    ✓ response is JSON
+    ✓ availability response is true
+
+    HTTP
+    http_req_duration..............: avg=557.41µs min=0s       med=530.1µs  max=2.11ms   p(50)=530.1µs  p(90)=1.06ms   p(95)=1.18ms   p(99)=1.43ms  
+      { expected_response:true }...: avg=557.41µs min=0s       med=530.1µs  max=2.11ms   p(50)=530.1µs  p(90)=1.06ms   p(95)=1.18ms   p(99)=1.43ms  
+    http_req_failed................: 0.00%  0 out of 2533
+    http_reqs......................: 2533   38.854781/s
+
+    EXECUTION
+    iteration_duration.............: avg=501.27ms min=500.01ms med=501.27ms max=514.18ms p(50)=501.27ms p(90)=501.97ms p(95)=502.16ms p(99)=502.55ms
+    iterations.....................: 2533   38.854781/s
+    vus............................: 1      min=1         max=39
+    vus_max........................: 40     min=40        max=40
+
+    NETWORK
+    data_received..................: 590 kB 9.1 kB/s
+    data_sent......................: 301 kB 4.6 kB/s
+
+
+
+k6 exit code: 0

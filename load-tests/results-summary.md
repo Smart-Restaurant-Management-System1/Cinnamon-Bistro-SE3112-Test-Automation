@@ -1,22 +1,20 @@
 # Load and Performance Results Summary
 
-**Status: runtime performance measurements unavailable.** This report distinguishes the failed local availability check from measured service performance.
+**Status: four local profiles completed.** The table below reports the final runs against the running local reservation service. An earlier smoke attempt against a stopped service is retained as a failed pre-start check.
 
-- **Date checked:** 2026-10-17 (Asia/Colombo)
+- **Test date:** 2026-10-17 (Asia/Colombo)
 - **Target:** `GET http://localhost:5000/api/tables/availability` (source-confirmed public controller route)
-- **Environment:** Windows developer workstation; k6 v2.2.0 installed at `C:\Program Files\k6\k6.exe`
-- **Runtime availability:** connection to `localhost:5000` was refused during the probe and smoke attempt. The backend was not observed running.
-- **Thresholds:** defined in each script; they are planned test gates, not measured SLAs.
+- **Environment:** Windows workstation, .NET SDK 10.0.401, k6 v2.2.0, local ASP.NET Core reservation service
+- **Runtime controls:** Kafka publishing and order-expiry worker disabled. This static endpoint did not access MySQL. Docker is not installed.
+- **Thresholds:** planned gates for these runs, not a production SLA.
 
 | Scenario | VUs | Requests/sec | p95 | p99 | Error rate | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Smoke | 1 | NOT A PERFORMANCE RESULT | NOT A PERFORMANCE RESULT | NOT A PERFORMANCE RESULT | 100% failed requests in unavailable-target check | EXECUTED, FAILED: connection refused; response/check thresholds failed |
-| Baseline | 2 | NOT MEASURED | NOT MEASURED | NOT MEASURED | NOT MEASURED | NOT RUN: backend unavailable |
-| Load | 1–20 | NOT MEASURED | NOT MEASURED | NOT MEASURED | NOT MEASURED | NOT RUN: backend unavailable |
-| Stress | 1–40 | NOT MEASURED | NOT MEASURED | NOT MEASURED | NOT MEASURED | NOT RUN: backend unavailable; isolated approved environment required |
+| Smoke | 1 | 1.992 | 1.366 ms | 1.445 ms | 0% | PASS; 20 requests, 100% checks |
+| Baseline | 2 | 3.988 | 1.056 ms | 1.140 ms | 0% | PASS; 120 requests, 100% checks |
+| Load | 1–20 | 18.613 | 1.084 ms | 1.307 ms | 0% | PASS; 1,120 requests, 100% checks |
+| Stress | 1–40 | 38.855 | 1.185 ms | 1.438 ms | 0% | PASS; 2,533 requests, 100% checks |
 
-## Findings and next action
+All four final runs returned HTTP 200 with the expected JSON field, passed their configured thresholds, and recorded no HTTP failures. Throughput rose as the virtual-user profile increased. No bottleneck was observed for this lightweight route. The route returns a static controller response, so these measurements do not represent database-backed reservation creation, Kafka publishing, authenticated workflows, or a deployed environment.
 
-The endpoint contract and local k6 executable were verified. The smoke script ran for 10 seconds and confirmed that connection refusal produces failed HTTP checks and a failed k6 threshold result (exit code 99). The failed-run request count and request rate are not reported as service performance because no HTTP response was received. Baseline, load, and stress profiles were not run. Start the upstream development stack in an isolated environment, confirm the availability URL responds with HTTP 200 and `available: true`, then run smoke first. Proceed to baseline and load only after smoke is healthy; run stress only with explicit approval for that environment. Save each k6 summary under `test-reports/load/` and update this table from those actual summary files.
-
-No performance bottleneck can be identified from the current evidence. The availability route returns a static controller response according to source, so it does not represent the cost of reservation persistence or the full booking workflow.
+The initial pre-start smoke attempt is preserved in `load-tests/evidence/09-initial-smoke-unavailable-target.txt`; it is not included in the performance results. Raw final k6 summaries are in `test-reports/load/`. Detailed logs and the measured comparison chart are indexed in `load-tests/evidence/EVIDENCE_INDEX.md`.
