@@ -39,14 +39,14 @@ Create the report directory, then run one script at a time from the repository r
 ```powershell
 New-Item -ItemType Directory -Force test-reports/load | Out-Null
 $k6 = 'C:\Program Files\k6\k6.exe'
-& $k6 run --summary-export=test-reports/load/smoke-summary.json load-tests/scripts/smoke.js
+& $k6 run --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' --summary-export=test-reports/load/smoke-summary.json load-tests/scripts/smoke.js
 ```
 
 To use another explicitly approved target:
 
 ```powershell
 $env:TARGET_URL = 'http://localhost:5000/api/tables/availability'
-& $k6 run --summary-export=test-reports/load/baseline-summary.json load-tests/scripts/baseline.js
+& $k6 run --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' --summary-export=test-reports/load/baseline-summary.json load-tests/scripts/baseline.js
 Remove-Item Env:TARGET_URL
 ```
 
@@ -66,16 +66,16 @@ Thresholds are planned gates for this test suite, not measured service-level obj
 Run baseline, load, or stress with the corresponding summary file:
 
 ```powershell
-& $k6 run --summary-export=test-reports/load/baseline-summary.json load-tests/scripts/baseline.js
-& $k6 run --summary-export=test-reports/load/load-summary.json load-tests/scripts/reservation-load.js
-& $k6 run --summary-export=test-reports/load/stress-summary.json load-tests/scripts/stress.js
+& $k6 run --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' --summary-export=test-reports/load/baseline-summary.json load-tests/scripts/baseline.js
+& $k6 run --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' --summary-export=test-reports/load/load-summary.json load-tests/scripts/reservation-load.js
+& $k6 run --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' --summary-export=test-reports/load/stress-summary.json load-tests/scripts/stress.js
 ```
 
 k6 prints requests, request rate, average and percentile latency, failed-request rate, checks, and threshold status to the console. `--summary-export` writes the same run's machine-readable summary. A non-zero exit status means a threshold or execution failed; retain that result and investigate it rather than editing metrics.
 
 ## Findings and limitations
 
-At implementation time, k6 v2.2.0 was installed and ran directly from `C:\Program Files\k6\k6.exe`. All four scripts passed k6's `inspect` validation. A 10-second smoke execution was attempted against the local URL, but the connection was refused; it failed its response checks and thresholds. That failed availability run is not a backend performance measurement. See [`results-summary.md`](results-summary.md) for the evidence boundary and current status.
+On 2026-10-17, all four profiles were executed against the locally running reservation service. Smoke, baseline, load, and stress passed their configured thresholds; every response check passed and the measured HTTP failure rate was 0%. The initial smoke attempt before service startup failed with connection refusal and is preserved separately from the final measurements. See [`results-summary.md`](results-summary.md) and [`LOAD_TESTING_REPORT.md`](LOAD_TESTING_REPORT.md) for the measurements and limits.
 
 The default endpoint is a lightweight public availability response and does not exercise database-backed reservation creation, authentication, or a full customer journey. A load result describes the specific machine, service configuration, dependencies, and target environment used during that run; it is not a production capacity guarantee. No test credentials are embedded. Future authenticated scenarios should use dedicated disposable accounts and secret-managed credentials, and should avoid creating persistent reservation data unless cleanup is defined.
 
