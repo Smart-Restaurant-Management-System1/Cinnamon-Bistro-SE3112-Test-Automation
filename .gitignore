@@ -108,3 +108,6 @@ logs/
 *.log
 *.tmp
 *.bak
+
+# .NET build output
+obj/
