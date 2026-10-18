@@ -124,6 +124,7 @@ jobs:
           dotnet test unit-tests/CinnamonBistro.UnitTests.csproj \
             --configuration Release \
             -p:TargetAppRoot=${{ github.workspace }}/target-app \
+            --settings quality-checks/coverlet.runsettings \
             --logger "trx;LogFileName=unit-test-results.trx" \
             --results-directory test-reports/unit \
             --collect:"XPlat Code Coverage"
@@ -378,7 +379,56 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download Quality & Coverage Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: quality-and-coverage-reports
+          path: test-reports/
+
+      - name: Download Unit Test Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: unit-test-reports
+          path: test-reports/unit/
+
+      - name: Generate Dual-Source Coverage Report
+        run: |
+          mkdir -p test-reports/coverage
+          node quality-checks/process-dual-coverage.js \
+            --baseline-json test-reports/coverage/reports/Summary.json \
+            --unit-dir test-reports/unit \
+            --output test-reports/coverage/dual-coverage-summary.md \
+            --min-line-coverage 40.0 \
+            --min-branch-coverage 35.0
+
+      - name: Publish Dual-Source Coverage Summary
+        if: always()
+        run: |
+          if [ -f "test-reports/coverage/dual-coverage-summary.md" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat "test-reports/coverage/dual-coverage-summary.md" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Dual-Source Coverage Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dual-coverage-summary
+          path: test-reports/coverage/dual-coverage-summary.md
+          if-no-files-found: ignore
+
       - name: Evaluate Pipeline Status & Publish Consolidated Summary
+        if: always()
         run: |
           echo "=============================================================================="
           echo " SE3112 Automated Testing Pipeline — Consolidated Stage Status"
