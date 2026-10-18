@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>CinnamonBistro.UnitTests</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      Root of the application under test (the original CSP repo, read-only).
+      Local default: sibling clone ..\Cinnamon-Bistro-CSP-Reference.
+      CI override:   dotnet test ... -p:TargetAppRoot=../target-app  (or an absolute path)
+    -->
+    <TargetAppRoot Condition="'$(TargetAppRoot)' == ''">$(MSBuildThisFileDirectory)..\..\Cinnamon-Bistro-CSP-Reference</TargetAppRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(TargetAppRoot)/backend/identity-service/identity-service.csproj" />
+    <ProjectReference Include="$(TargetAppRoot)/backend/reservation-service/reservation-service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
