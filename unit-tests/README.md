@@ -62,10 +62,12 @@ The command exits non-zero when any assertion fails.
 | Pricing / totals | `Pricing/OrderCartItemSubtotalTests.cs` | `OrderCartItem.Subtotal` | exact decimal arithmetic (e.g. 0.10 x 3 = 0.30); free item; zero / negative quantity; no rounding (characterisation); recompute on change |
 | Pricing / totals | `Pricing/OrderCartServiceTests.cs` | `OrderCartService` | add/update/remove/clear; quantity 1..99 boundaries; 90+9 ok / 90+10 rejected; non-positive ids; missing / unavailable menu item; repository failure; empty cart is not cleared in the repository |
 | Authorization | `Authorization/RoleAuthorizationTests.cs` | `[Authorize]` metadata of real controllers | allowed role accepted; wrong role, unauthenticated and role-less users rejected; case-sensitive roles; staff controllers use `RequireStaff`; role-name contract between services |
+| Reservation lifecycle | `Reservation/ReservationLifecycleServiceTests.cs` | `ReservationLifecycleService.ChangeStatusAsync`, `ReservationLifecycleService.CancelForCustomerAsync` | Valid status transitions (Pending->Confirmed/Cancelled, Confirmed->Cancelled/Completed); rejection of unknown/null/empty/case-mismatched statuses without repo queries; missing reservation returns NotFound; disallowed transitions (Pending->Completed, Confirmed->Pending, Cancelled/Completed terminal states, self-transitions); repository update failure (concurrency conflict); admin (null customerId) vs customer scope; customer cancellation (Cancelled, NotFound, InvalidState); CancellationToken forwarding; exception propagation |
+| Reservation rescheduling | `Reservation/ReservationRescheduleServiceTests.cs` | `ReservationRescheduleService.RescheduleAsync` | Valid reschedule request returns Updated and forwards parameters; propagation of all domain outcomes (NotFound, Forbidden, InvalidState, TableNotFound, Unavailable); Admin vs Customer command structures and ownership flags; overlapping booking conflicts on table (Unavailable); table capacity exceeded or inactive table (Unavailable); non-existent table (TableNotFound); terminal state or past-cutoff restrictions (InvalidState); CancellationToken forwarding; repository exception propagation (InvalidOperationException, TimeoutException) |
 
 **Moq `Setup` + `Verify`:** e.g. `LoginAsync_ValidCredentials_ReturnsTokenAndUserClaims` verifies `GenerateToken` ran exactly once with the
 user's roles; the failure-path tests verify `GenerateToken`/`VerifyPassword` were **never** called; register tests verify the exact
-`User` handed to `CreateUserWithRoleAsync` (`It.Is<User>(...)`).
+`User` handed to `CreateUserWithRoleAsync` (`It.Is<User>(...)`); `ChangeStatusAsync` tests verify exact status parameters and assert that `GetStatusAsync`/`UpdateStatusAsync` are **never** called (`Times.Never`) on invalid inputs; `CancelForCustomerAsync` and `RescheduleAsync` verify atomic delegation, parameter mapping, and `CancellationToken` forwarding.
 
 ## Design notes
 
@@ -90,6 +92,8 @@ user's roles; the failure-path tests verify `GenerateToken`/`VerifyPassword` wer
   unit suite verifies only that an `Unavailable` outcome is propagated. Real capacity enforcement needs an integration test.
 - **Authorization**: policies are registered in `Program.cs` and cannot be evaluated without a host; policy-protected controllers are
   checked by policy name only. `[Authorize(Roles=...)]` semantics are evaluated by a small helper in the test that mirrors ASP.NET's rule.
+- **Reservation lifecycle persistence and concurrency**: `ReservationLifecycleService` delegates status storage and atomic outbox writes to `IReservationRepository`; real MySQL row-level `FOR UPDATE` locking and outbox event publishing are integration concerns requiring a live database.
+- **Reservation rescheduling atomic checks**: `ReservationRescheduleService` delegates atomic table locking, overlap detection, and maintenance policy evaluation (`ReservationMaintenancePolicy`) to `IReservationRepository.RescheduleAtomicallyAsync`; the unit tests verify service-level contract adherence, command mapping, outcome propagation, and token forwarding without invoking MySQL.
 - `JwtTokenGenerator.GenerateToken` does not defensively validate null roles (it fails incidentally with `NullReferenceException`);
   the test documents this behaviour.
 - `reservation-service` exposes internals only to its own test assembly, so only public types are tested.
@@ -99,4 +103,6 @@ user's roles; the failure-path tests verify `GenerateToken`/`VerifyPassword` wer
 
 ## Latest verified result
 
-Windows 11, .NET SDK 10.0.401, Release: **Passed 156, Failed 0, Skipped 0** (command above, exit code 0).
+Windows 11, .NET SDK 10.0.401, Release: **Passed 204, Failed 0, Skipped 0** (command above, exit code 0).
+- Baseline suite: 156 tests (Authentication, Authorization, Pricing, Reservation Search/Creation/Policies).
+- Coverage expansion: +48 tests (`ReservationLifecycleServiceTests`: 32 tests, `ReservationRescheduleServiceTests`: 16 tests).
