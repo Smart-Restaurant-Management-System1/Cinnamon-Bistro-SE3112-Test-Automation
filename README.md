@@ -4,8 +4,8 @@
 [![Module](https://img.shields.io/badge/Module-SE3112%20Advanced%20Software%20Engineering-orange.svg)](#)
 [![Base Project](https://img.shields.io/badge/Base%20Project-SE3022%20Cinnamon%20Bistro%20CSP-green.svg)](#)
 [![Branch](https://img.shields.io/badge/Branch-develop-blue.svg)](#)
-[![Verified Commit](https://img.shields.io/badge/Verified%20Commit-d3d9c57-blueviolet.svg)](#)
-[![Verified CI Run](https://img.shields.io/badge/CI%20Run-%2333%20Passing-brightgreen.svg)](#)
+[![Verified Commit](https://img.shields.io/badge/Verified%20Commit-b96ea71-blueviolet.svg)](#)
+[![Verified CI Integration](https://img.shields.io/badge/CI%20Integration-PR%20%2315%20%26%20%2316%20Merged-brightgreen.svg)](#)
 
 ---
 
@@ -33,11 +33,11 @@ In accordance with SE3112 curriculum guidelines, the testing strategy is structu
 
 | Testing Area | Repository Directory | Ownership Classification | Individual / Lead Owner | Primary Scope & Objectives | Implementation Status |
 | :--- | :--- | :--- | :--- | :--- | :---: |
-| **Code Quality & Metrics** | [`quality-checks/`](quality-checks/) | **Individual Area 1** | **Wijesinghe K**<br>`IT24102587` | Static code analysis, linters, baseline regression gating, Coverlet coverage, and quality gate enforcement. | **VERIFIED & ACTIVE** |
+| **Code Quality & Metrics** | [`quality-checks/`](quality-checks/) | **Individual Area 1** | **Wijesinghe K**<br>`IT24102587` | Static code analysis, linters, baseline regression gating, Coverlet coverage, and dual-source reporting. | **VERIFIED & ACTIVE (PR #16)** |
 | **UI / End-to-End Testing** | [`e2e-tests/`](e2e-tests/) | **Individual Area 2** | **H.R.M.A.A. Bandara**<br>`IT24100315` | Automated customer journeys (Auth, Menu, Table Booking) using Playwright & headless Chromium via route mocking. | **VERIFIED & ACTIVE (PR #12, PR #13)** |
-| **Unit Testing & Mocking** | [`unit-tests/`](unit-tests/) | **Individual Area 3** | **Perera H.L.P.S.**<br>`IT24101848` | Microservice unit tests, parameterized tests (`[Theory]`), and Moq test doubles isolating repository dependencies. | **VERIFIED & ACTIVE (PR #11, PR #13)** |
+| **Unit Testing & Mocking** | [`unit-tests/`](unit-tests/) | **Individual Area 3** | **Perera H.L.P.S.**<br>`IT24101848` | Microservice unit tests, parameterized tests (`[Theory]`), and Moq test doubles isolating repository dependencies (204 tests). | **VERIFIED & ACTIVE (PR #11, PR #13, PR #15)** |
 | **Load & Performance Testing**| [`load-tests/`](load-tests/) | **Individual Area 4** | **D.M.N. Presanjith**<br>`IT24101505` | Microservice load testing, concurrency profiles (Smoke, Baseline, Load, Stress), and SLA threshold evaluation. | **VERIFIED & ACTIVE (PR #8, PR #9)** |
-| **Test Automation Pipeline** | [`.github/workflows/`](.github/workflows/) | **Shared Group Requirement** | **Wijesinghe K** *(Lead)*<br>*(All Members Contribute)* | Unified CI/CD workflow orchestration, automated test execution, step summaries, and downloadable CI artifacts. | **VERIFIED & ACTIVE (PR #13, Run #33)** |
+| **Test Automation Pipeline** | [`.github/workflows/`](.github/workflows/) | **Shared Group Requirement** | **Wijesinghe K** *(Lead)*<br>*(All Members Contribute)* | Unified CI/CD workflow orchestration, automated test execution, dual coverage reporting, step summaries, and downloadable CI artifacts. | **VERIFIED & ACTIVE (PR #13, PR #15, PR #16)** |
 | *Mutation Testing* | [`mutation-tests/`](mutation-tests/) | *Exploratory / Unassigned* | *None (Reserved)* | Retained in directory structure for potential exploration; **not** an individually assessed scope. | *Reserved Scope / Informational* |
 
 ---
@@ -63,13 +63,15 @@ Cinnamon-Bistro-SE3112-Test-Automation/
 │   ├── compare-eslint-baseline.js # Composite multiset signature regression gate evaluator
 │   ├── coverlet.runsettings       # Coverlet assembly filtering configuration
 │   ├── process-coverage.js        # Automated coverage threshold gate evaluator
+│   ├── process-dual-coverage.js   # Dual-source coverage parser & markdown summary generator (PR #16)
+│   ├── process-dual-coverage.test.js # 13 automated parser unit tests
 │   ├── run-quality-checks.sh      # Cross-platform Bash pipeline harness
 │   └── run-quality-checks.ps1     # Cross-platform PowerShell pipeline harness
 ├── unit-tests/                    # Isolated xUnit domain tests & Moq doubles (Perera H.L.P.S.)
 │   ├── Authentication/            # Login, registration, and JWT token generator unit tests
 │   ├── Authorization/             # Role authorization contract reflection tests
 │   ├── Pricing/                   # Order cart subtotal decimal arithmetic & quantity tests
-│   ├── Reservation/               # Availability search validator, policy & service tests
+│   ├── Reservation/               # Lifecycle, reschedule, availability validator & service tests (204 tests)
 │   ├── Support/                   # FixedTimeProvider deterministic test double
 │   ├── CinnamonBistro.UnitTests.csproj # .NET 10 standalone test project
 │   └── README.md                  # Unit test case inventory, prerequisites & commands
@@ -112,8 +114,8 @@ Each team member owns exactly one distinct individual testing area. The shared C
 
 | Student Name | Student ID | Individual Testing Area | Group Role | Implementation Deliverables & Verifiable PRs |
 | :--- | :---: | :--- | :--- | :--- |
-| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader & CI Pipeline Lead** | • Decoupled repository architecture and branching governance.<br>• Multi-stage GitHub Actions pipeline (`testing-pipeline.yml`).<br>• ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$).<br>• Automated execution of 570 unit tests & Coverlet coverage.<br>• Full CI activation of all 4 testing stages (PR #9, PR #10, PR #13).<br>• Authored team handover guide (`docs/team-integration-guide.md`, PR #5). |
-| **Perera H.L.P.S.** | `IT24101848` | **Unit Testing & Mocking** | QA Automation Engineer | • Authored standalone xUnit project (`CinnamonBistro.UnitTests.csproj`).<br>• Implemented 156 unit tests across Authentication, Authorization, Pricing, and Reservation.<br>• In-memory Moq test doubles isolating repository & Kafka dependencies.<br>• Parameterized tests (`[Theory]`) for boundary and interval analysis.<br>• Fully integrated into CI with TRX and Cobertura reporting (PR #11, PR #13). |
+| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader & CI Pipeline Lead** | • Decoupled repository architecture and branching governance.<br>• Multi-stage GitHub Actions pipeline (`testing-pipeline.yml`).<br>• ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$).<br>• Automated execution of 570 unit tests & Coverlet coverage.<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16).<br>• 13 automated parser unit tests (`process-dual-coverage.test.js`).<br>• Full CI activation of all 4 testing stages (PR #9, PR #10, PR #13, PR #16).<br>• Authored team handover guide (`docs/team-integration-guide.md`, PR #5). |
+| **Perera H.L.P.S.** | `IT24101848` | **Unit Testing & Mocking** | QA Automation Engineer | • Authored standalone xUnit project (`CinnamonBistro.UnitTests.csproj`).<br>• Implemented 204 unit tests across Authentication, Authorization, Pricing, and Reservation.<br>• 48 reservation lifecycle & rescheduling tests added via PR #15.<br>• In-memory Moq test doubles isolating repository & Kafka dependencies.<br>• Parameterized tests (`[Theory]`) for boundary and interval analysis.<br>• Fully integrated into CI with TRX and Cobertura reporting (PR #11, PR #13, PR #15). |
 | **H.R.M.A.A. Bandara**| `IT24100315` | **UI / End-to-End Testing** | QA Automation Engineer | • Authored Playwright browser automation suite (`e2e-tests/`).<br>• Implemented 13 customer journey tests across Public UI and Mocked Customer UI.<br>• Network-isolated API route mocking via `page.route()` for deterministic CI.<br>• Integrated local Vite web server lifecycle management (`scripts/start-app.mjs`).<br>• Fully integrated into CI with JUnit XML, HTML reports, and screenshots (PR #12, PR #13). |
 | **D.M.N. Presanjith**| `IT24101505` | **Load & Performance Testing**| QA Automation Engineer | • Authored Grafana k6 performance suite (`load-tests/scripts/`).<br>• Executed 4 local workload profiles (Smoke, Baseline, Load, Stress).<br>• Automated CI smoke testing gate against isolated reservation microservice.<br>• Measured throughput and latency percentiles (p95: 11.53ms in CI).<br>• Authored `LOAD_TESTING_REPORT.md` and `results-summary.md` (PR #8, PR #9). |
 
@@ -126,13 +128,13 @@ The CI/CD pipeline definition ([`.github/workflows/testing-pipeline.yml`](.githu
 ### Pipeline DAG Workflow Topology
 ```text
 [1. foundation-check] ──► [2. quality-checks] ──► Parallel Concurrent Execution:
-       (PASSED)                  (PASSED)               ├──► [3. unit-tests  (xUnit + Moq: 156 tests - PASSED)]
+       (PASSED)                  (PASSED)               ├──► [3. unit-tests  (xUnit + Moq: 204 tests - PASSED)]
                                                         ├──► [4. e2e-tests   (Playwright: 13 tests - PASSED)]
                                                         ├──► [5. load-tests  (k6 Smoke Profile - PASSED)]
                                                         └──► [6. mutation-tests (Reserved Notice)]
                                                                       │
 [7. publish-reports] ◄────────────────────────────────────────┘
-       (PASSED — Dynamic Consolidation & Failure Gate)
+       (PASSED — Dual-Source Coverage Reporting & Quality Gate Evaluation)
 ```
 
 ### Stage Execution Breakdown
@@ -145,11 +147,11 @@ The CI/CD pipeline definition ([`.github/workflows/testing-pipeline.yml`](.githu
    - Automatically executes **570 pre-existing CSP unit tests** (100% pass rate: 122 Identity, 448 Reservation).
    - Collects Coverlet coverage and enforces automated quality gate floors via `process-coverage.js` (**44.9% Line**, **42.4% Branch**).
    - Generates interactive HTML dashboard and uploads `quality-and-coverage-reports` artifact bundle.
-3. **`unit-tests` (`PASSED`, ~25s — PR #11, PR #13):**
+3. **`unit-tests` (`PASSED`, ~25s — PR #11, PR #13, PR #15):**
    - Checks out CSP into `target-app/` and provisions .NET 10 SDK.
    - Restores and executes `unit-tests/CinnamonBistro.UnitTests.csproj` with `-p:TargetAppRoot=${{ github.workspace }}/target-app`.
-   - Executes **156 standalone unit tests** with Moq doubles (100% pass rate, 0 failed, 0 skipped).
-   - Collects TRX results and Coverlet Cobertura XML; uploads `unit-test-reports` artifact bundle.
+   - Executes **204 standalone unit tests** with Moq doubles (100% pass rate, 0 failed, 0 skipped).
+   - Collects TRX results and Coverlet Cobertura XML using `quality-checks/coverlet.runsettings`; uploads `unit-test-reports` artifact bundle.
    - Publishes execution breakdown table to `$GITHUB_STEP_SUMMARY`.
 4. **`e2e-tests` (`PASSED`, ~1m 15s — PR #12, PR #13):**
    - Sets up Node.js 20, installs CSP frontend dependencies (`npm ci --ignore-scripts`), and installs Playwright Chromium with OS libraries.
@@ -164,10 +166,11 @@ The CI/CD pipeline definition ([`.github/workflows/testing-pipeline.yml`](.githu
    - Evaluates latency thresholds via `scripts/process-load-summary.js` (**p95: 11.53ms < 1000ms SLA**, **0.00% error rate**, **60/60 checks passed**).
    - Safely terminates background process via PID and uploads `load-testing-reports` artifact bundle.
 6. **`mutation-tests` (`Reserved / Notice Only`):** Explicitly logs notice confirming mutation testing is an unassigned exploratory scope.
-7. **`publish-reports` (`PASSED`, ~5s — PR #13):**
-   - Dynamically evaluates `${{ needs.<job>.result }}` across all assessed stages.
-   - Emits consolidated execution summary table to `$GITHUB_STEP_SUMMARY`.
-   - Enforces overall pipeline gate: exits non-zero if any assessed stage fails, preventing failure masking.
+7. **`publish-reports` (`PASSED`, ~10s — PR #13, PR #16):**
+   - Downloads `quality-and-coverage-reports` and `unit-test-reports` artifacts.
+   - Executes `quality-checks/process-dual-coverage.js` to dynamically generate a dual-source coverage report separating baseline from independent unit metrics.
+   - Appends `dual-coverage-summary.md` and consolidated execution status to `$GITHUB_STEP_SUMMARY`.
+   - Uploads `dual-coverage-summary` artifact and enforces overall pipeline gate with `if: always()` retention.
 
 ### Downloadable CI Artifact Bundles
 Every passing pipeline execution packages and uploads consolidated artifacts accessible from the GitHub Actions run summary:
@@ -178,31 +181,43 @@ Every passing pipeline execution packages and uploads consolidated artifacts acc
 | **`unit-test-reports.zip`** | `test-reports/unit/` | `unit-test-results.trx`, `<guid>/coverage.cobertura.xml` | xUnit test execution logs & coverage |
 | **`e2e-test-reports.zip`** | `test-reports/e2e/` | `junit.xml`, `report/index.html`, `artifacts/*.png` | Playwright test report & visual snapshots |
 | **`load-testing-reports.zip`** | `test-reports/load/` | `smoke-summary.json`, `load-summary.md`, `backend.log`, `k6-execution.log` | k6 performance metrics & SLA verification |
+| **`dual-coverage-summary.zip`** | `test-reports/coverage/` | `dual-coverage-summary.md` | Consolidated dual-source coverage comparison |
 
 ---
 
 ## 6. Verified Empirical Quality & Performance Metrics
 
-All metrics reported below have been empirically measured and verified on branch `develop` (HEAD: `d3d9c57`, Verified CI Run: **#33**):
+All metrics reported below have been empirically measured and verified on branch `develop` (HEAD: `b96ea71`, Verified Integration: PR #15 & PR #16):
 
 ### 6.1 Code Quality & Coverage Metrics (Wijesinghe K)
 - **Baseline CSP Unit Tests:** **570 / 570 Passed (100% pass rate)**.
   - *Academic Note:* These 570 tests exist in the base CSP application; the assessed contribution is automating their compilation, execution, Coverlet coverage instrumentation, and gate enforcement.
-- **Combined Line Coverage:** **`44.9%`** (1,478 / 3,288 lines) vs. **$\ge 40.0\%$ Quality Gate Floor** -> **`PASSED`**.
-- **Combined Branch Coverage:** **`42.4%`** (393 / 926 branches) vs. **$\ge 35.0\%$ Quality Gate Floor** -> **`PASSED`**.
+- **Baseline Line Coverage:** **`44.9%`** (1,478 / 3,288 lines) vs. **$\ge 40.0\%$ Quality Gate Floor** -> **`PASSED`**.
+- **Baseline Branch Coverage:** **`42.4%`** (393 / 926 branches) vs. **$\ge 35.0\%$ Quality Gate Floor** -> **`PASSED`**.
 - **Frontend ESLint Regression Gate:** **`PASSED`** ($\Delta_{\text{new errors}} = 0$ against 129 cataloged historical findings).
 - **NuGet Vulnerability Audit:** **0 CVEs Detected** across all transitive dependencies.
+- **Dual-Source Coverage Architecture (PR #16):** Automated by `quality-checks/process-dual-coverage.js`. Evaluates and publishes CSP baseline and independent unit suite metrics in two distinct sections without mathematical addition or averaging.
+- **Reporting Parser Verification:** **13 / 13 Passed (100% pass rate)** in automated test suite (`quality-checks/process-dual-coverage.test.js`).
 
 ### 6.2 Unit Testing & Mocking Metrics (Perera H.L.P.S.)
-- **Standalone xUnit Test Suite:** **156 / 156 Passed (100% pass rate)** across 9 test classes.
+- **Standalone xUnit Test Suite:** **204 / 204 Passed (100% pass rate)** across 11 test classes (expanded from 156 with 48 new tests via PR #15).
 - **Failures:** `0` | **Skipped:** `0` | **Execution Time:** ~1.0 second.
 - **Domain Coverage:**
   - *Authentication (39 tests):* `AuthService.LoginAsync`, `AuthService.RegisterAsync`, `JwtTokenGenerator.GenerateToken`.
-  - *Reservation Validation (61 tests):* `AvailabilitySearchValidator`, `ReservationPolicies`, `ReservationCreationService`.
+  - *Reservation Validation & Policies (61 tests):* `AvailabilitySearchValidator`, `ReservationPolicies`, `ReservationCreationService`.
+  - *Reservation Lifecycle & Rescheduling (48 tests — PR #15):*
+    - `ReservationLifecycleServiceTests` (32 tests): Valid transitions (`Pending->Confirmed/Cancelled`, `Confirmed->Cancelled/Completed`), rejection of unknown/null/empty/case-mismatched statuses without querying repository (`Times.Never`), missing reservation (`NotFound`), disallowed transitions (`Conflict`), admin vs customer ID forwarding, customer cancellation outcomes (`Cancelled`, `NotFound`, `InvalidState`), CancellationToken forwarding, exception handling.
+    - `ReservationRescheduleServiceTests` (16 tests): Reschedule delegation, outcome propagation across all domain outcomes (`Updated`, `NotFound`, `Forbidden`, `InvalidState`, `TableNotFound`, `Unavailable`), Admin vs Customer command structures, overlapping booking conflicts, table capacity exceeded, non-existent table, terminal state, CancellationToken forwarding, exception handling.
   - *Pricing & Cart (43 tests):* `OrderCartItem.Subtotal` exact decimal arithmetic, `OrderCartService` quantity boundaries (1..99).
   - *Authorization (13 tests):* Real controller `[Authorize]` attributes, cross-service role contracts.
-- **Test Double Implementation:** In-memory `Moq` doubles (`Mock<IUserRepository>`, `Mock<IPasswordHasher>`, `Mock<IJwtTokenGenerator>`, etc.) with strict invocation verifications (`Verify(..., Times.Once)` / `Times.Never`).
-- **Parameterized Testing:** 28 `[Theory]` definitions testing boundary limits, midnight transitions, and interval overlaps.
+- **Test Double Implementation:** In-memory `Moq` doubles (`Mock<IUserRepository>`, `Mock<IPasswordHasher>`, `Mock<IJwtTokenGenerator>`, `Mock<IReservationRepository>`, etc.) with strict invocation verifications (`Verify(..., Times.Once)` / `Times.Never`).
+- **Parameterized Testing:** 32 `[Theory]` definitions testing boundary limits, midnight transitions, invalid statuses, and outcome mappings.
+- **Independent Suite Coverage (Release Mode):**
+  - **Line Coverage:** **`5.9%`** (171 / 2,886 lines)
+  - **Branch Coverage:** **`10.3%`** (95 / 926 branches)
+  - **Targeted Class Line & Branch Coverage:** `ReservationLifecycleService` (**100.0% Line**, **100.0% Branch**), `ReservationRescheduleService` (**100.0% Line**, **100.0% Branch**), `ReservationStatusTransitionPolicy` (**100.0% Line**, **100.0% Branch**).
+  - **Compiler Denominator Note:** In Release builds (`net10.0`), compiler optimizations and method inlining reduce coverable sequence points to 2,886 lines (vs. 3,288 in Debug mode), while decision branches remain constant at 926 branches.
+  - **Strict Non-Additive Policy:** Independent unit suite coverage validates isolated business logic with test doubles and is reported separately from the 570 CSP baseline integration tests. Baseline regression floors ($\ge 40\%$ line, $\ge 35\%$ branch) remain strictly enforced on baseline tests.
 
 ### 6.3 UI & End-to-End Testing Metrics (H.R.M.A.A. Bandara)
 - **Playwright Browser Test Suite:** **13 / 13 Passed (100% pass rate)** across 2 spec files.
@@ -261,14 +276,14 @@ dotnet tool restore
 *Generated reports will be available under `test-reports/quality/` and `test-reports/coverage/reports/index.html`.*
 
 ### 3. Run Standalone Unit Tests Locally (Area 3 — Perera H.L.P.S.)
-Execute Perera's xUnit suite directly against the sibling CSP reference:
+Execute Perera's 204 xUnit tests directly against the sibling CSP reference:
 
 ```powershell
 cd Cinnamon-Bistro-SE3112-Test-Automation
 dotnet restore unit-tests/CinnamonBistro.UnitTests.csproj -p:TargetAppRoot=../target-app
-dotnet test unit-tests/CinnamonBistro.UnitTests.csproj --configuration Release -p:TargetAppRoot=../target-app --logger "trx;LogFileName=unit-test-results.trx" --results-directory test-reports/unit --collect:"XPlat Code Coverage"
+dotnet test unit-tests/CinnamonBistro.UnitTests.csproj --configuration Release -p:TargetAppRoot=../target-app --settings quality-checks/coverlet.runsettings --logger "trx;LogFileName=unit-test-results.trx" --results-directory test-reports/unit --collect:"XPlat Code Coverage"
 ```
-*Results will be generated at `test-reports/unit/unit-test-results.trx` and `test-reports/unit/<guid>/coverage.cobertura.xml`.*
+*Results will be generated at `test-reports/unit/unit-test-results.trx` (204 passed) and `test-reports/unit/<guid>/coverage.cobertura.xml`.*
 
 ### 4. Run UI / End-to-End Tests Locally (Area 2 — H.R.M.A.A. Bandara)
 Install dependencies and run Playwright in headless or headed mode:
@@ -312,6 +327,23 @@ k6 run --summary-export=test-reports/load/load-summary.json load-tests/scripts/r
 # Stress Profile (Ramp to 40 VUs, 65s)
 k6 run --summary-export=test-reports/load/stress-summary.json load-tests/scripts/stress.js
 ```
+
+### 6. Generate Dual-Source Coverage Report & Run Parser Tests
+Generate the consolidated dual-source coverage report separating baseline from independent metrics:
+
+```powershell
+cd Cinnamon-Bistro-SE3112-Test-Automation
+
+# Run automated reporting parser unit tests (13 tests)
+node --test quality-checks/process-dual-coverage.test.js
+
+# Process and generate dual-source Markdown summary
+node quality-checks/process-dual-coverage.js `
+  --baseline-json test-reports/coverage/reports/Summary.json `
+  --unit-dir test-reports/unit `
+  --output test-reports/coverage/dual-coverage-summary.md
+```
+*Generated report will be available at `test-reports/coverage/dual-coverage-summary.md`.*
 
 ---
 
