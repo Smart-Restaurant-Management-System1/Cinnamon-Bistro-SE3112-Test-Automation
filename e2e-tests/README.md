@@ -61,7 +61,8 @@ Do not edit application `.env` files, frontend code, or shared pipeline configur
 **This is a network-isolated browser UI suite, not full-stack E2E.**
 It runs the real application components in Chromium. Authenticated tests install a
 synthetic customer session and intercept API requests with `page.route()`.
-Public validation/navigation tests require no API responses. There are no real API tests in this suite.
+Public validation/navigation tests require no API responses. This classification applies to
+the default 13-test suite. The separately invoked live Identity extension is documented below.
 
 | Test | What it proves |
 | --- | --- |
@@ -145,13 +146,14 @@ Evidence (relative to repository root):
 Reports/screenshots are deliberately not committed. Attach `report.png` and the cart
 screenshot by dragging these local files into the GitHub PR description or a PR comment.
 
-## Full-stack limitations and team-lead handoff
+## Original 18 October infrastructure limitation and team-lead handoff
 
 The application has .NET 10 identity/reservation services with MySQL 8 and Kafka.
 Docker CLI is installed locally, but `com.docker.service` and `MySQL80` are stopped;
 `docker info` cannot connect because the Docker named pipe is absent. No isolated
 database/seeded test accounts were supplied. A real backend journey is therefore
-unverified. Mocked success is not evidence of database or cross-service correctness.
+unverified at that stage. Mocked success is not evidence of database or cross-service correctness.
+The separate extension below provisions its own database instead of using these services.
 
 For a future full-stack run, the lead must provision an isolated local test stack:
 initialize its MySQL schemas/migrations, start identity on 5001 and reservation on
@@ -189,3 +191,170 @@ The cart test checks both visible state and outgoing mutations; reservation vali
 that invalid input does not call the API. Retry recovery tests the UI's error path.
 Mocks give controlled responses but cannot prove backend persistence, auth or integration.
 These workflows exercise several UI components; they are distinct from unit tests of functions.
+
+## Separate live Identity integration extension (IT24100315)
+
+Branch: `feature/IT24100315-live-backend-e2e`, created from updated testing
+`develop` at `44d3601c1caa18977db4e489dddfd99fb7d93dad` on 19 October 2026.
+
+The existing `npm test` command, `tests/` files and `playwright.config.js` are preserved.
+They still select only the original 13 deterministic browser UI cases. Live tests live in
+`live/tests/`, carry `@live` in their titles, and require their own configuration and runner:
+
+```powershell
+# From e2e-tests/; install the updated lockfile and browser first
+npm ci
+npx playwright install chromium
+npm run test:live
+npm run report:live
+```
+
+### Actual boundaries and prerequisites
+
+This suite exercises the real React frontend, actual .NET 10 Identity Service and a real
+private MySQL 8 instance. It does not import the mocked UI fixture and never calls
+`page.route()` or supplies fake API responses. The optional reservation scenario is not
+implemented: reservation, Kafka, ordering and payments are outside this extension.
+
+Required: Node 22.16+, .NET 10 SDK with NuGet restore access, installed Chromium,
+and the application checkout identified by `E2E_APP_PATH` (same semantics as above).
+Install its frontend dependencies with `npm ci --ignore-scripts` in
+`frontend/restaurant-web/` before running. Application revision inspected:
+`ee41765622ac458399bd208171d930dcb6a070a9` on CSP `develop`.
+
+On Windows, native MySQL is the default. The runner starts a separate `mysqld.exe`;
+it never starts, reconfigures or uses the installed MySQL service or its data directory:
+
+```powershell
+$env:E2E_LIVE_MYSQL_MODE='native'
+$env:E2E_MYSQLD_PATH='C:/Program Files/MySQL/MySQL Server 8.0 New/bin/mysqld.exe'
+npm run test:live
+```
+
+If using Docker instead, the owned Compose file starts only MySQL under a unique
+per-run project and removes that project's volume after execution:
+
+```powershell
+$env:E2E_LIVE_MYSQL_MODE='docker'
+npm run test:live
+```
+
+Docker mode requires a working Docker daemon and Compose v2, plus access to the pinned
+`mysql:8.0.46` image. Native and Docker modes use the same schema and browser tests.
+Docker mode is an available setup path, not a claim of a verified Docker run.
+
+Default live ports are MySQL `33079`, Identity `15001`, frontend `15173`, all bound
+to loopback. The runner refuses occupied or duplicate ports. Override with
+`E2E_LIVE_DB_PORT`, `E2E_LIVE_IDENTITY_PORT`, `E2E_LIVE_FRONTEND_PORT` as needed.
+The original default UI server on 5173 is independent.
+
+### Database setup, account isolation and cleanup
+
+`live/run-live.mjs` builds the application into ignored `.runtime/` artifacts. It
+initializes a fresh native data directory or a private Compose volume, applies the
+actual application `database/identity-db/01_init_identity.sql` and
+`02_admin_user_management.sql`, substituting only the database name in memory with
+`e2e_it24100315_identity`. The application files are not edited. It adds a harness
+ownership marker containing a unique run ID. Database helpers refuse access unless
+this marker matches the managed run.
+
+All database/JWT/test passwords are randomly generated at runtime and passed only
+through child-process environments. Do not supply production credentials or point
+this runner at a shared database. Native initialization briefly uses the fresh
+instance's empty bootstrap root account, then sets a random password before starting
+Identity. No password is hardcoded or written into source configuration.
+
+Registration uses unique `bandara-live-<UUID>@example.com` addresses and synthetic
+names. Identity's existing `EmailValidation__SkipDnsCheck=true` setting avoids an
+external DNS dependency; email syntax, disposable-domain checks, actual registration,
+BCrypt authentication and database calls still run. No verification email is sent by
+the inspected registration implementation. DNS/email deliverability is not covered.
+
+Each test owns its account. Login tests seed independently through the real register
+API; they never depend on the UI registration test or a pre-existing account. Fixture
+`finally` cleanup deletes only that exact email and verifies zero remaining Users and
+UserRoles mappings. The runner additionally requires zero total Users/UserRoles before
+shutdown, so missed cleanup fails the command even if the browser assertions passed.
+Services stop in `finally`, including on test/build failure. Ignored native data and
+build directories remain for diagnostics; they are not submission artifacts.
+
+### Three live scenarios
+
+| Test | Setup/action | Assertions |
+| --- | --- | --- |
+| Browser customer registration | Fresh account; fill real registration form and submit | Real `POST /api/auth/register` returns 201; response identity/Customer role; visible success; stored user/role and non-plaintext password; current redirect ends at login because registration does not authenticate |
+| Successful customer login/profile | Independently register a test account through the real API; visit protected `/profile`, then log in | Real login returns 200; frontend returns to `/profile`; real authenticated `GET /api/users/profile` returns 200 and the same email; visible name/email match; authenticated state exists |
+| Rejected existing-user login | Independently register a test account; submit a different password in the browser | Real login returns 401; actual error message appears; stays at login; no authenticated state; seeded user remains until fixture cleanup |
+
+The profile layout's unrelated notification counter attempts the reservation API on
+loopback port 15000, which this identity-only stack does not start. That counter is
+not mocked or asserted; its unavailable-service fallback is outside the tested journey.
+No claim of complete reservation-service integration is made.
+
+### Live diagnostics and integration ownership
+
+Live results are separate and Git ignored:
+
+- `test-reports/e2e-live/junit.xml`
+- `test-reports/e2e-live/report/index.html`
+- `test-reports/e2e-live/artifacts/` — representative screenshots, failure screenshots/videos, sanitized API/cleanup attachments
+- `test-reports/e2e-live/startup/` — build, MySQL, Identity, frontend and Playwright logs
+- `test-reports/e2e-live/run-summary.json` — actual command exit and aggregate cleanup verification
+
+If infrastructure fails before browsers run, no new JUnit/HTML result is produced;
+check the latest `run-summary.json` and startup logs rather than treating an older
+report as a result for that attempt.
+
+Authentication traces/HARs are disabled because they capture passwords and JWTs.
+The live reporter redacts generated test passwords from diagnostic step titles and
+errors before HTML/JUnit reporters serialize them. Traffic attachments contain only
+method, endpoint path and status; no request/response bodies, tokens or credentials.
+
+Live commands remain opt-in. No shared GitHub Actions workflow is changed and no
+live CI execution is claimed. The lead must separately decide whether/where to run
+this stack; `npm run test:live` must never replace `npm test` in default CI.
+
+### Verified extension results — 19 October 2026
+
+Windows; Node 22.16.0; .NET SDK 10.0.400; MySQL 8.0.46; Playwright 1.58.2.
+
+| Command | Actual final result | Exit |
+| --- | --- | --- |
+| `npm.cmd run test:live` (native private MySQL) | 3 passed, 0 failed, 0 skipped; 27.6 seconds of Playwright execution | 0 |
+| `npm.cmd test` (run after live services stopped) | Existing 13 passed, 0 failed, 0 skipped; 50.2 seconds | 0 |
+
+The final `run-summary.json` records `success=true`, `cleanupVerified=true`,
+`remainingUsers=0`, `remainingUserRoles=0`, `testExitCode=0`, `exitCode=0`.
+Each live report contains a `real-api-and-cleanup` attachment: registration POST 201;
+login POST 200 plus profile GET 200; wrong-password POST 401. Each test deleted its
+one owned account and verified zero remaining user/role mappings. The report's embedded
+JSON was inspected for generated test-password and issued-JWT patterns; none were found.
+
+Actual successful-run browser evidence is in `test-reports/e2e-live/artifacts/`:
+`real-registration-complete.png`, `real-authenticated-profile.png`, and
+`real-login-rejected.png`, each within its corresponding test directory.
+The actual HTML report was also captured in Chromium as
+`test-reports/e2e-live/evidence/report.png` and visually inspected alongside the
+authenticated profile screenshot. Attach these local PNGs to the PR manually;
+generated evidence is deliberately not committed.
+
+Earlier attempts are not counted as passing: the first managed run stopped before
+tests because private MySQL startup exceeded a 90-second readiness window (exit 1).
+The next run returned 2 passed/1 failed (exit 1): registration's full document reload
+hit the 30-second test deadline after the 201/persistence checks passed. Cleanup was
+still verified. Its JUnit/HTML/log/summary are retained under
+`test-reports/e2e-live/evidence/first-browser-attempt/`. The initial readiness failure
+summary is `evidence/initial-mysql-readiness-failure.json`.
+
+The live-only configuration now uses a 60-second test limit and 15-second assertion
+limit; MySQL readiness is bounded at 180 seconds, initialization at 300 seconds, and
+HTTP readiness requests at 2 seconds. Assertions and the existing suite were not weakened
+or edited. The successful final run used another fresh database. Native initialization
+can take several minutes on this Windows machine, separate from the 27.6-second test time.
+An initially concurrent default run was interrupted during startup and is not claimed
+as a passing execution; the complete sequential 13-case result above is the verification.
+
+Remaining limitations: Docker mode and live CI execution are unverified; the reservation
+workflow is not included; external DNS deliverability is deliberately disabled through
+the application's existing test configuration. Global MySQL/Docker services remain
+stopped. The isolated native run does not depend on them.
