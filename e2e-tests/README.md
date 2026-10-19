@@ -358,3 +358,128 @@ Remaining limitations: Docker mode and live CI execution are unverified; the res
 workflow is not included; external DNS deliverability is deliberately disabled through
 the application's existing test configuration. Global MySQL/Docker services remain
 stopped. The isolated native run does not depend on them.
+
+
+### Optional real reservation journey ? 19 October 2026
+
+This extension adds **one independently isolated Playwright test** with a successful
+booking and a stale-tab conflict case. It uses the real React frontend, running
+Identity Service, Reservation Service and their local MySQL databases. There is no
+`page.route()` or fabricated backend response in this suite. The existing three
+managed Identity tests and 13 default browser tests remain separate and unchanged.
+
+The earlier statement that global services were stopped describes the Identity-only
+run above. For this reservation verification, the developer started the real local
+services on ports 5001 and 5000 and authorized temporary local database records.
+Docker is not required for this command; Docker execution is not claimed.
+
+#### Prerequisites and startup
+
+Use a **local test installation**, never production/shared customer databases.
+Initialize the application's Identity and Reservation schemas using its documented
+SQL migration sequence before starting; this harness does not migrate, reset, seed
+standard tables in, or drop an existing database. Required reservation tables include
+RestaurantTables, Reservations, ReservationOutbox and CustomerNotifications.
+
+Start MySQL and the two application services yourself. In separate terminals, from
+the application root (replace the path with your checkout):
+
+```powershell
+cd <application-root>
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+dotnet run --project backend/identity-service --urls http://localhost:5001
+# Separate terminal, same application root and Development environment:
+dotnet run --project backend/reservation-service --urls http://localhost:5000
+```
+
+The services need compatible JWT settings, initialized user roles, and Reservation
+Service access to the Identity Users table for its account-status validation.
+Install application frontend dependencies with `npm ci` in
+`frontend/restaurant-web`; install this contribution's dependencies with `npm ci`
+and `npx playwright install chromium` in `e2e-tests`.
+
+Run from `e2e-tests`:
+
+```powershell
+$env:E2E_SERVICE_APP_PATH = 'B:\SLIIT\Y3S1\CSP\Smart-Restaurant-Management-System'
+$env:E2E_RESERVATION_ALLOW_LOCAL_WRITES = '1'
+npm.cmd run test:live:reservation
+npm.cmd run report:live:reservation
+```
+
+`E2E_SERVICE_APP_PATH` is configurable and points at the checkout used by the running
+services. Its files are read only. The helper reads ConnectionStrings.DefaultConnection
+from appsettings.json with appsettings.Development.json overriding it; credentials
+stay in memory and are not copied into this repository. Environment-variable/user-secret
+connection overrides are not resolved by this helper. The supported local connection
+format uses Server, Port, Database, User (or User ID), Password. It refuses nonloopback
+hosts and database names other than restaurant_identity_db / restaurant_reservation_db.
+Do not paste credentials into logs or commit local configuration.
+
+`E2E_RESERVATION_ALLOW_LOCAL_WRITES=1` explicitly enables fixture writes. The runner
+generates E2E_RESERVATION_RUN_ID and E2E_LIVE_ACCOUNT_PASSWORD itself. It starts only
+a private Vite frontend on 127.0.0.1:15174; that port must be free and permitted by the
+services' local CORS settings. API origins are fixed to localhost:5001 and localhost:5000.
+It neither starts nor stops the developer's backend/MySQL services.
+
+#### Scenario and isolation
+
+The fixture registers a unique `bandara-res-<random>@example.com` Customer through
+the real Identity API, verifies its persisted user, and inserts one unique
+`E2E-<random>` table. The browser visits protected availability, logs in, searches
+for a date seven days ahead at 18:00 for 60 minutes/two guests, and selects that exact
+table by its visible heading. A second tab selects it before the first confirms.
+
+Assertions verify real login 200, availability 200 and the owned table in the response;
+first-tab booking 201, returned table/party/reference, confirmation URL and visible
+reference; second-tab booking 409 with TABLE_NO_LONGER_AVAILABLE, the complete visible
+conflict message and recovery link. SQL verifies exactly one Pending reservation
+owned by the test user, with the expected table, party size and booking reference.
+These two tabs are one test's controlled sequence; no test depends on another test.
+
+Teardown closes browser activity and deletes only this unique user's reservation
+records, matching reservation outbox rows, customer notifications, unique table,
+user and cascading role mappings. It asserts zero remaining owned records. It does
+not delete unrelated rows or reset either database. Cleanup failures fail the test.
+The runner additionally requires cleanup.json to match the current run ID before
+returning exit 0. Do not forcibly kill a run during teardown; if interrupted, use the
+unique fixture identifiers in diagnostics to investigate before rerunning.
+
+#### Actual results and evidence
+
+| Command | Verified result | Exit |
+| --- | --- | --- |
+| `npm.cmd run test:live:reservation` (final) | 1 passed, 0 failed, 0 skipped; 13.6 seconds total | 0 |
+| `npm.cmd test` (regression) | Existing 13 passed, 0 failed, 0 skipped; 44.9 seconds total | 0 |
+
+The immediately preceding reservation run also passed (12.7 seconds total). The final
+run validates the additional runner safeguard requiring matching cleanup evidence.
+The real traffic/cleanup report attachment records login 200, availability 200,
+booking 201 and conflict 409; cleanup removed one reservation and verified zero
+remaining owned reservations, notifications, outbox events, tables, users and role
+mappings. No total-database row counts or customer data are included in evidence.
+
+Earlier failures are retained honestly: the first attempt timed out on an exact label
+selector (1 failed, exit 1); the second reached real 201/409 but failed because an exact
+alert assertion also included its recovery link (1 failed, exit 1). The corrected
+assertion checks the full message and the recovery link separately. Archives are
+`test-reports/e2e-reservation-live-first-attempt/` (report/JUnit/summary) and
+`test-reports/e2e-reservation-live-second-attempt/` (including failure artifacts).
+
+Latest generated evidence, all ignored by Git:
+
+- `test-reports/e2e-reservation-live/junit.xml`
+- `test-reports/e2e-reservation-live/report/index.html`
+- `test-reports/e2e-reservation-live/run-summary.json`
+- `test-reports/e2e-reservation-live/cleanup.json`
+- `test-reports/e2e-reservation-live/evidence/report.png`
+- `test-reports/e2e-reservation-live/artifacts/`: real-reservation-confirmed.png and
+  real-reservation-conflict.png inside the test's directory; failure screenshots/video
+  are retained for unsuccessful runs. Authentication traces remain disabled.
+
+The command is opt-in and must not replace default `npm test` in shared CI. The team
+lead can collect the separate JUnit/HTML paths after explicitly provisioning these
+local services. No shared workflow was changed and live GitHub Actions execution is
+not verified. This test does not verify Kafka delivery, orders, payments, Azure storage,
+email delivery or every reservation lifecycle operation. It uses the application's
+existing behavior: a successful confirmation UI corresponds to a Pending database row.
