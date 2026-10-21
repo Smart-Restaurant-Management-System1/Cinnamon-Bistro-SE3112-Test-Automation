@@ -1,0 +1,12 @@
+Captured: 2026-10-17 13:05:07 +05:30
+Branch: feature/load-tests
+HEAD: 7577dfd chore(load): remove presentation notes
+Staged changes: none
+--- git status --short --branch ---
+## feature/load-tests...origin/feature/load-tests
+ M load-tests/README.md
+ M load-tests/results-summary.md
+?? load-tests/LOAD_TESTING_REPORT.md
+?? load-tests/evidence/
+
+The report and evidence from this run are intentionally uncommitted. Machine-readable k6 summaries are under test-reports/load/; the repository .gitignore excludes that directory.
