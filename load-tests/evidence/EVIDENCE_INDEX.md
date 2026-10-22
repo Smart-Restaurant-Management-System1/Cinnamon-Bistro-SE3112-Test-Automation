@@ -1,8 +1,8 @@
 # Load Testing Evidence Index
 
-**Run dates:** 2026-10-17 and 2026-10-21 (Asia/Colombo)
-**Targets:** local table availability and, for the 2026-10-21 smoke, Prometheus `/metrics`
-**Final test outcome:** original smoke, baseline, load, stress, and expanded two-endpoint smoke passed.
+**Run dates:** 2026-10-17, 2026-10-21, and 2026-10-22 (Asia/Colombo)
+**Targets:** local table availability and Prometheus `/metrics`
+**Final test outcome:** original smoke, baseline, load, stress, and both recorded expanded two-endpoint smoke runs passed.
 **Raw k6 JSON summaries:** original profile summaries are retained locally under `test-reports/load/`; new smoke summaries are checked in here.
 
 | File | Demonstrates | Scenario / status | Requirement supported |
@@ -20,6 +20,8 @@
 | `legacy-smoke-summary.json` | Machine-readable result of the 2026-10-21 original availability-only smoke | Smoke / passed | Exact latency and threshold values |
 | `expanded-smoke-output.txt` | Full two-endpoint k6 smoke output, including endpoint-tagged metrics and thresholds | Expanded smoke / passed on 2026-10-21 | Added metrics coverage |
 | `expanded-smoke-summary.json` | Machine-readable summary of the expanded smoke run | Expanded smoke / passed | Exact latency, request counts, and threshold values |
+| `expanded-smoke-2026-10-22-output.txt` | Full two-endpoint k6 smoke output from the latest local run | Expanded smoke / passed on 2026-10-22; 40 requests and 140/140 checks | Latest endpoint-specific measurements and thresholds |
+| `expanded-smoke-2026-10-22-summary.json` | Machine-readable summary from the latest expanded smoke run | Expanded smoke / passed | Exact latest latency and request values |
 | `../LOAD_TESTING_REPORT.md` | Plain-English summary of scope, environment, results, findings, and limits | Final report | University submission report |
 | `../../test-reports/load/smoke-summary.json` | Machine-readable smoke metrics and thresholds | Smoke / passed | Raw result data |
 | `../../test-reports/load/baseline-summary.json` | Machine-readable baseline metrics and thresholds | Baseline / passed | Raw result data |

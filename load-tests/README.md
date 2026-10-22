@@ -83,7 +83,7 @@ Run baseline, load, or stress with the corresponding summary file:
 
 k6 prints requests, request rate, average and percentile latency, failed-request rate, checks, and threshold status to the console. `--summary-export` writes the same run's machine-readable summary. A non-zero exit status means a threshold or execution failed; retain that result and investigate it rather than editing metrics.
 
-## Expanded smoke measurements (2026-10-21)
+## Previous expanded smoke measurements (2026-10-21)
 
 The reservation service was run locally on Windows using .NET SDK 10.0.401 and k6 v2.2.0. Direct probes returned HTTP 200 for both endpoints; `/metrics` returned `text/plain; version=0.0.4; charset=utf-8`. The expanded k6 smoke run completed 20 requests per endpoint, all 140 checks passed, and all thresholds passed. The run's machine-readable summary and full console output are in [`evidence/expanded-smoke-summary.json`](evidence/expanded-smoke-summary.json) and [`evidence/expanded-smoke-output.txt`](evidence/expanded-smoke-output.txt).
 
@@ -94,6 +94,18 @@ The reservation service was run locally on Windows using .NET SDK 10.0.401 and k
 | **Combined** | **40** | **3.917882** | **4.38 ms** | **8.05 ms** | **20.76 ms** | **0/40 (0%)** | **140/140 passed** |
 
 Each smoke scenario ran for 10 seconds with 1 VU; the combined maximum was 2 VUs. Combined request latency percentiles are not an SLO and should not be interpreted as either endpoint's individual latency. These measurements describe one local workstation/service run only and do not establish production capacity.
+
+## Latest expanded smoke measurements (2026-10-22)
+
+The local reservation service was started from the separate CSP checkout with its Kafka publisher and order-expiry worker disabled. Direct probes returned HTTP 200 for both endpoints; availability returned the expected JSON and `/metrics` returned `text/plain; version=0.0.4; charset=utf-8` with Prometheus metadata and samples. The expanded smoke completed 20 requests per endpoint, 140/140 checks, and zero HTTP failures. All global and endpoint-specific thresholds passed.
+
+| Endpoint | Requests | Requests/sec | Avg | p95 | p99 | HTTP failures | Checks |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `GET /api/tables/availability` | 20 | 1.972582 | 1.88 ms | 5.26 ms | 10.64 ms | 0/20 (0%) | 60/60 passed |
+| `GET /metrics` | 20 | 1.972582 | 5.42 ms | 6.11 ms | 9.64 ms | 0/20 (0%) | 80/80 passed |
+| **Combined** | **40** | **3.945165** | **3.65 ms** | **6.11 ms** | **11.42 ms** | **0/40 (0%)** | **140/140 passed** |
+
+Each endpoint ran for 10 seconds with 1 VU (2 VUs total). The thresholds remained p95 < 1000 ms, HTTP failure rate < 1%, checks > 99%, and at least one request per endpoint. The full k6 output and machine-readable summary for this run are in [`evidence/expanded-smoke-2026-10-22-output.txt`](evidence/expanded-smoke-2026-10-22-output.txt) and [`evidence/expanded-smoke-2026-10-22-summary.json`](evidence/expanded-smoke-2026-10-22-summary.json). The 2026-10-21 run above is retained separately; these workstation measurements are not a GitHub Actions result or a production capacity claim.
 
 ## Findings, CI, and limitations
 

@@ -1,7 +1,7 @@
 # Cinnamon Bistro Load Testing Report
 
 **Course:** SE3112 — Automated Testing Pipeline
-**Test date:** 17 October 2026 (Asia/Colombo)
+**Test dates:** 17, 21, and 22 October 2026 (Asia/Colombo)
 **Target:** `GET http://localhost:5000/api/tables/availability`
 
 ## 1. Introduction
@@ -96,3 +96,11 @@ Each smoke scenario ran for 10 seconds at 1 VU (2 VUs total), producing 20 reque
 The raw expanded output and k6 JSON are in [`evidence/expanded-smoke-output.txt`](evidence/expanded-smoke-output.txt) and [`evidence/expanded-smoke-summary.json`](evidence/expanded-smoke-summary.json). The separate availability-only regression run is in [`evidence/legacy-smoke-output.txt`](evidence/legacy-smoke-output.txt) and [`evidence/legacy-smoke-summary.json`](evidence/legacy-smoke-summary.json). Its p95 was 12.69 ms, with 20 requests, 0% HTTP failures, 60/60 checks, and all thresholds passing.
 
 This smoke only validates the lightweight availability and monitoring endpoints; it does not represent database-backed reservation or ordering workload. These local results are not a GitHub Actions result and do not guarantee production capacity.
+
+## Latest local smoke verification (22 October 2026)
+
+The local reservation service was started from the separate CSP checkout with the Kafka publisher and order-expiry worker disabled. Direct HTTP probes confirmed HTTP 200 from both endpoints, the expected availability JSON, and a Prometheus text response from `/metrics` (`text/plain; version=0.0.4; charset=utf-8`) with metadata and metric samples. No CSP source files were modified.
+
+The expanded k6 smoke ran two concurrent scenarios for 10 seconds each at 1 VU per endpoint (2 VUs total). Availability completed 20 requests at 1.972582 requests/sec, with 1.88 ms average, 5.26 ms p95, 10.64 ms p99, zero HTTP failures, and 60/60 checks passed. Metrics completed 20 requests at 1.972582 requests/sec, with 5.42 ms average, 6.11 ms p95, 9.64 ms p99, zero HTTP failures, and 80/80 checks passed. Combined results were 40 requests at 3.945165 requests/sec, 3.65 ms average, 6.11 ms p95, 11.42 ms p99, 0/40 HTTP failures, and 140/140 checks passed. All global and endpoint-specific thresholds passed.
+
+The exact output and summary are preserved in [`evidence/expanded-smoke-2026-10-22-output.txt`](evidence/expanded-smoke-2026-10-22-output.txt) and [`evidence/expanded-smoke-2026-10-22-summary.json`](evidence/expanded-smoke-2026-10-22-summary.json). This is a local measurement, not a GitHub Actions result; CI status and integration against the latest `develop` revision remain unverified.
