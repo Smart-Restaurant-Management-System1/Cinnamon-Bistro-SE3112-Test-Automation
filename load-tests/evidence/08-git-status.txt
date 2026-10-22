@@ -1,4 +1,4 @@
-﻿Captured: 2026-10-17 13:05:07 +05:30
+Captured: 2026-10-17 13:05:07 +05:30
 Branch: feature/load-tests
 HEAD: 7577dfd chore(load): remove presentation notes
 Staged changes: none

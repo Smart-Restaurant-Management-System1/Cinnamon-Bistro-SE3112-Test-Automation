@@ -1,4 +1,4 @@
-﻿Test: baseline
+Test: baseline
 Started: 2026-10-17 12:58:27 +05:30
 Finished: 2026-10-17 12:58:57 +05:30
 Target: http://localhost:5000/api/tables/availability
@@ -7,7 +7,7 @@ Environment: local ASP.NET Core reservation service; publisher and expiry worker
 --- k6 output ---
 
 
-  █ THRESHOLDS 
+  █ THRESHOLDS
 
     checks
     ✓ 'rate>0.99' rate=100.00%
@@ -20,7 +20,7 @@ Environment: local ASP.NET Core reservation service; publisher and expiry worker
     ✓ 'rate<0.01' rate=0.00%
 
 
-  █ TOTAL RESULTS 
+  █ TOTAL RESULTS
 
     checks_total.......: 360     11.962752/s
     checks_succeeded...: 100.00% 360 out of 360
@@ -31,8 +31,8 @@ Environment: local ASP.NET Core reservation service; publisher and expiry worker
     ✓ availability response is true
 
     HTTP
-    http_req_duration..............: avg=543.09µs min=0s       med=539.4µs  max=1.21ms   p(50)=539.4µs  p(90)=946µs    p(95)=1.05ms   p(99)=1.13ms  
-      { expected_response:true }...: avg=543.09µs min=0s       med=539.4µs  max=1.21ms   p(50)=539.4µs  p(90)=946µs    p(95)=1.05ms   p(99)=1.13ms  
+    http_req_duration..............: avg=543.09µs min=0s       med=539.4µs  max=1.21ms   p(50)=539.4µs  p(90)=946µs    p(95)=1.05ms   p(99)=1.13ms
+      { expected_response:true }...: avg=543.09µs min=0s       med=539.4µs  max=1.21ms   p(50)=539.4µs  p(90)=946µs    p(95)=1.05ms   p(99)=1.13ms
     http_req_failed................: 0.00% 0 out of 120
     http_reqs......................: 120   3.987584/s
 

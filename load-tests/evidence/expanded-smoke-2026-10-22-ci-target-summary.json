@@ -1,0 +1,268 @@
+{
+    "root_group": {
+        "groups": {},
+        "checks": {
+                "availability endpoint returns HTTP 200": {
+                    "name": "availability endpoint returns HTTP 200",
+                    "path": "::availability endpoint returns HTTP 200",
+                    "id": "199387a45eff14937a53766933c38b87",
+                    "passes": 20,
+                    "fails": 0
+                },
+                "response is JSON": {
+                    "name": "response is JSON",
+                    "path": "::response is JSON",
+                    "id": "23a1facfa2bd64a1546c60eda62ef64e",
+                    "passes": 20,
+                    "fails": 0
+                },
+                "availability response has expected structure": {
+                    "name": "availability response has expected structure",
+                    "path": "::availability response has expected structure",
+                    "id": "8d57d2092f9b5b53834a73e00679b670",
+                    "passes": 20,
+                    "fails": 0
+                },
+                "metrics endpoint returns HTTP 200": {
+                    "name": "metrics endpoint returns HTTP 200",
+                    "path": "::metrics endpoint returns HTTP 200",
+                    "id": "f3b6adc3b3ad0c78b0b4c85524ba6968",
+                    "passes": 20,
+                    "fails": 0
+                },
+                "metrics response uses Prometheus text content type": {
+                    "name": "metrics response uses Prometheus text content type",
+                    "path": "::metrics response uses Prometheus text content type",
+                    "id": "8c1eb07ec2ee7b53d5674767a04a9b87",
+                    "passes": 20,
+                    "fails": 0
+                },
+                "metrics response contains Prometheus metadata": {
+                    "path": "::metrics response contains Prometheus metadata",
+                    "id": "7cb725cce4225d3741d6dc79ba6fe2cf",
+                    "passes": 20,
+                    "fails": 0,
+                    "name": "metrics response contains Prometheus metadata"
+                },
+                "metrics response contains a metric sample": {
+                    "passes": 20,
+                    "fails": 0,
+                    "name": "metrics response contains a metric sample",
+                    "path": "::metrics response contains a metric sample",
+                    "id": "a769de1df8750fa1325c94a2a5a8021d"
+                }
+            },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "metrics": {
+        "data_sent": {
+            "count": 4620,
+            "rate": 457.12232649855315
+        },
+        "data_received": {
+            "count": 1191448,
+            "rate": 117886.90079265111
+        },
+        "vus_max": {
+            "value": 2,
+            "min": 2,
+            "max": 2
+        },
+        "http_req_duration{endpoint:table-availability}": {
+            "p(90)": 1.2312200000000002,
+            "p(95)": 1.3777250000000003,
+            "p(99)": 1.6045849999999997,
+            "avg": 0.8445500000000001,
+            "min": 0,
+            "med": 0.8845000000000001,
+            "max": 1.6613,
+            "p(50)": 0.8845000000000001,
+            "thresholds": {
+                "p(95)<1000": false
+            }
+        },
+        "http_req_connecting": {
+            "p(95)": 0.05586499999999682,
+            "p(99)": 1.1173,
+            "avg": 0.055865,
+            "min": 0,
+            "med": 0,
+            "max": 1.1173,
+            "p(50)": 0,
+            "p(90)": 0
+        },
+        "checks": {
+            "fails": 0,
+            "passes": 140,
+            "thresholds": {
+                "rate>0.99": false
+            },
+            "value": 1
+        },
+        "checks{endpoint:prometheus-metrics}": {
+            "passes": 80,
+            "fails": 0,
+            "thresholds": {
+                "rate>0.99": false
+            },
+            "value": 1
+        },
+        "http_reqs{endpoint:table-availability}": {
+            "count": 20,
+            "rate": 1.9788845302967668,
+            "thresholds": {
+                "count>0": false
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 5.09404,
+            "p(99)": 5.690334999999999,
+            "avg": 2.7604875000000004,
+            "min": 0,
+            "med": 2.8497000000000003,
+            "max": 6.031,
+            "p(50)": 2.8497000000000003,
+            "p(90)": 4.92524
+        },
+        "http_req_tls_handshaking": {
+            "max": 0,
+            "p(50)": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_sending": {
+            "p(99)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(50)": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "http_req_receiving": {
+            "p(90)": 1.138820000000002,
+            "p(95)": 2.548334999999998,
+            "p(99)": 3.513356,
+            "avg": 0.6611124999999999,
+            "min": 0,
+            "med": 0.5045,
+            "max": 3.6926,
+            "p(50)": 0.5045
+        },
+        "iterations": {
+            "count": 40,
+            "rate": 3.9577690605935336
+        },
+        "http_req_failed{endpoint:table-availability}": {
+            "fails": 20,
+            "passes": 0,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration{endpoint:prometheus-metrics}": {
+            "max": 6.031,
+            "p(50)": 4.72035,
+            "p(90)": 5.09738,
+            "p(95)": 5.201175,
+            "p(99)": 5.865034999999999,
+            "avg": 4.676425,
+            "min": 4.0381,
+            "med": 4.72035,
+            "thresholds": {
+                "p(95)<1000": false
+            }
+        },
+        "http_req_duration": {
+            "med": 2.8497000000000003,
+            "max": 6.031,
+            "p(50)": 2.8497000000000003,
+            "p(90)": 4.92524,
+            "p(95)": 5.09404,
+            "p(99)": 5.690334999999999,
+            "avg": 2.7604875000000004,
+            "min": 0,
+            "thresholds": {
+                "p(95)<1000": false
+            }
+        },
+        "iteration_duration": {
+            "avg": 503.45964000000015,
+            "min": 500.7323,
+            "med": 504.27189999999996,
+            "max": 507.8192,
+            "p(50)": 504.27189999999996,
+            "p(90)": 505.76194000000004,
+            "p(95)": 506.04672,
+            "p(99)": 507.325187
+        },
+        "vus": {
+            "value": 2,
+            "min": 2,
+            "max": 2
+        },
+        "checks{endpoint:table-availability}": {
+            "passes": 60,
+            "fails": 0,
+            "thresholds": {
+                "rate>0.99": false
+            },
+            "value": 1
+        },
+        "http_reqs": {
+            "count": 40,
+            "rate": 3.9577690605935336
+        },
+        "http_req_failed{endpoint:prometheus-metrics}": {
+            "passes": 0,
+            "fails": 20,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_blocked": {
+            "p(99)": 1.1173,
+            "avg": 0.055865,
+            "min": 0,
+            "med": 0,
+            "max": 1.1173,
+            "p(50)": 0,
+            "p(90)": 0,
+            "p(95)": 0.05586499999999682
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 40,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_reqs{endpoint:prometheus-metrics}": {
+            "count": 20,
+            "rate": 1.9788845302967668,
+            "thresholds": {
+                "count>0": false
+            }
+        },
+        "http_req_waiting": {
+            "med": 1.05635,
+            "max": 5.3402,
+            "p(50)": 1.05635,
+            "p(90)": 4.39196,
+            "p(95)": 4.57633,
+            "p(99)": 5.070671,
+            "avg": 2.0993749999999998,
+            "min": 0
+        }
+    }
+}

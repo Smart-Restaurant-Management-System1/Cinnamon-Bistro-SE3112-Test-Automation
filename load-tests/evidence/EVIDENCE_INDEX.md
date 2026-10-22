@@ -1,9 +1,9 @@
 # Load Testing Evidence Index
 
-**Run date:** 2026-10-17 (Asia/Colombo)  
-**Target:** local `GET /api/tables/availability` on port 5000  
-**Final test outcome:** smoke, baseline, load, and stress all passed.  
-**Raw k6 JSON summaries:** `../../test-reports/load/` (ignored by Git, retained locally).
+**Run dates:** 2026-10-17, 2026-10-21, and 2026-10-22 (Asia/Colombo)
+**Targets:** local table availability and Prometheus `/metrics`
+**Final test outcome:** original smoke, baseline, load, stress, and both recorded expanded two-endpoint smoke runs passed.
+**Raw k6 JSON summaries:** original profile summaries are retained locally under `test-reports/load/`; new smoke summaries are checked in here.
 
 | File | Demonstrates | Scenario / status | Requirement supported |
 | --- | --- | --- | --- |
@@ -16,6 +16,14 @@
 | `07-results-comparison.svg` | Actual p95, throughput, and HTTP error-rate comparisons from the four JSON summaries | Summary chart / generated from actual runs; not a screenshot | Results comparison |
 | `08-git-status.txt` | Branch and working-tree snapshot after evidence/report creation | Repository / snapshot | Git safety and review status |
 | `09-initial-smoke-unavailable-target.txt` | Earlier genuine smoke output when port 5000 refused connections | Initial pre-start check / failed; not counted as final scenario result | Transparent failure evidence |
+| `legacy-smoke-output.txt` | Re-run of original availability-only 1-VU smoke profile against the local service on 2026-10-21 | Smoke / passed; 20 requests and 60/60 checks | Existing behavior regression check |
+| `legacy-smoke-summary.json` | Machine-readable result of the 2026-10-21 original availability-only smoke | Smoke / passed | Exact latency and threshold values |
+| `expanded-smoke-output.txt` | Full two-endpoint k6 smoke output, including endpoint-tagged metrics and thresholds | Expanded smoke / passed on 2026-10-21 | Added metrics coverage |
+| `expanded-smoke-summary.json` | Machine-readable summary of the expanded smoke run | Expanded smoke / passed | Exact latency, request counts, and threshold values |
+| `expanded-smoke-2026-10-22-output.txt` | Full two-endpoint k6 smoke output from the latest local run | Expanded smoke / passed on 2026-10-22; 40 requests and 140/140 checks | Latest endpoint-specific measurements and thresholds |
+| `expanded-smoke-2026-10-22-summary.json` | Machine-readable summary from the latest expanded smoke run | Expanded smoke / passed | Exact latest latency and request values |
+| `expanded-smoke-2026-10-22-ci-target-output.txt` | Full k6 output using the integrated workflow's `127.0.0.1` base URL configuration | Expanded smoke / passed locally; 40 requests and 140/140 checks | CI-target configuration verification; not a GitHub Actions run |
+| `expanded-smoke-2026-10-22-ci-target-summary.json` | Machine-readable summary from the CI-target configuration smoke run | Expanded smoke / passed locally | Exact endpoint-specific latency and request values |
 | `../LOAD_TESTING_REPORT.md` | Plain-English summary of scope, environment, results, findings, and limits | Final report | University submission report |
 | `../../test-reports/load/smoke-summary.json` | Machine-readable smoke metrics and thresholds | Smoke / passed | Raw result data |
 | `../../test-reports/load/baseline-summary.json` | Machine-readable baseline metrics and thresholds | Baseline / passed | Raw result data |

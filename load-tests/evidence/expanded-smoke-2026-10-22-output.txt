@@ -1,0 +1,136 @@
+
+         /\      Grafana   /‾‾/
+    /\  /  \     |\  __   /  /
+   /  \/    \    | |/ /  /   ‾‾\
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/
+
+
+     execution: local
+        script: load-tests/scripts/smoke.js
+        output: -
+
+     scenarios: (100.00%) 2 scenarios, 2 max VUs, 40s max duration (incl. graceful stop):
+              * prometheus_metrics_smoke: 1 looping VUs for 10s (exec: metricsSmoke, gracefulStop: 30s)
+              * table_availability_smoke: 1 looping VUs for 10s (exec: availabilitySmoke, gracefulStop: 30s)
+
+
+running (01.0s), 2/2 VUs, 2 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  10% ] 1 VUs  01.0s/10s
+table_availability_smoke   [  10% ] 1 VUs  01.0s/10s
+
+running (02.0s), 2/2 VUs, 6 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  20% ] 1 VUs  02.0s/10s
+table_availability_smoke   [  20% ] 1 VUs  02.0s/10s
+
+running (03.0s), 2/2 VUs, 10 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  30% ] 1 VUs  03.0s/10s
+table_availability_smoke   [  30% ] 1 VUs  03.0s/10s
+
+running (04.0s), 2/2 VUs, 14 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  40% ] 1 VUs  04.0s/10s
+table_availability_smoke   [  40% ] 1 VUs  04.0s/10s
+
+running (05.0s), 2/2 VUs, 18 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  50% ] 1 VUs  05.0s/10s
+table_availability_smoke   [  50% ] 1 VUs  05.0s/10s
+
+running (06.0s), 2/2 VUs, 22 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  60% ] 1 VUs  06.0s/10s
+table_availability_smoke   [  60% ] 1 VUs  06.0s/10s
+
+running (07.0s), 2/2 VUs, 26 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  70% ] 1 VUs  07.0s/10s
+table_availability_smoke   [  70% ] 1 VUs  07.0s/10s
+
+running (08.0s), 2/2 VUs, 30 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  80% ] 1 VUs  08.0s/10s
+table_availability_smoke   [  80% ] 1 VUs  08.0s/10s
+
+running (09.0s), 2/2 VUs, 34 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [  90% ] 1 VUs  09.0s/10s
+table_availability_smoke   [  90% ] 1 VUs  09.0s/10s
+
+running (10.0s), 2/2 VUs, 38 complete and 0 interrupted iterations
+prometheus_metrics_smoke   [ 100% ] 1 VUs  10.0s/10s
+table_availability_smoke   [ 100% ] 1 VUs  10.0s/10s
+
+
+  █ THRESHOLDS
+
+    checks
+    ✓ 'rate>0.99' rate=100.00%
+
+      {endpoint:prometheus-metrics}
+      ✓ 'rate>0.99' rate=100.00%
+
+      {endpoint:table-availability}
+      ✓ 'rate>0.99' rate=100.00%
+
+    http_req_duration
+    ✓ 'p(95)<1000' p(95)=6.11ms
+
+      {endpoint:prometheus-metrics}
+      ✓ 'p(95)<1000' p(95)=6.11ms
+
+      {endpoint:table-availability}
+      ✓ 'p(95)<1000' p(95)=5.26ms
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+      {endpoint:prometheus-metrics}
+      ✓ 'rate<0.01' rate=0.00%
+
+      {endpoint:table-availability}
+      ✓ 'rate<0.01' rate=0.00%
+
+    http_reqs{endpoint:prometheus-metrics}
+    ✓ 'count>0' count=20
+
+    http_reqs{endpoint:table-availability}
+    ✓ 'count>0' count=20
+
+
+  █ TOTAL RESULTS
+
+    checks_total.......: 140     13.808076/s
+    checks_succeeded...: 100.00% 140 out of 140
+    checks_failed......: 0.00%   0 out of 140
+
+    ✓ metrics endpoint returns HTTP 200
+    ✓ metrics response uses Prometheus text content type
+    ✓ metrics response contains Prometheus metadata
+    ✓ metrics response contains a metric sample
+    ✓ availability endpoint returns HTTP 200
+    ✓ response is JSON
+    ✓ availability response has expected structure
+
+    HTTP
+    http_req_duration...................: avg=3.65ms   min=658.2µs  med=4.5ms    max=11.99ms  p(50)=4.5ms    p(90)=5.63ms   p(95)=6.11ms   p(99)=11.42ms
+      { endpoint:prometheus-metrics }...: avg=5.42ms   min=4.23ms   med=5.27ms   max=10.53ms  p(50)=5.27ms   p(90)=5.79ms   p(95)=6.11ms   p(99)=9.64ms
+      { endpoint:table-availability }...: avg=1.88ms   min=658.2µs  med=1.13ms   max=11.99ms  p(50)=1.13ms   p(90)=2.54ms   p(95)=5.26ms   p(99)=10.64ms
+      { expected_response:true }........: avg=3.65ms   min=658.2µs  med=4.5ms    max=11.99ms  p(50)=4.5ms    p(90)=5.63ms   p(95)=6.11ms   p(99)=11.42ms
+    http_req_failed.....................: 0.00%  0 out of 40
+      { endpoint:prometheus-metrics }...: 0.00%  0 out of 20
+      { endpoint:table-availability }...: 0.00%  0 out of 20
+    http_reqs...........................: 40     3.945165/s
+      { endpoint:prometheus-metrics }...: 20     1.972582/s
+      { endpoint:table-availability }...: 20     1.972582/s
+
+    EXECUTION
+    iteration_duration..................: avg=505.17ms min=501.14ms med=505.03ms max=531.25ms p(50)=505.03ms p(90)=506.34ms p(95)=508.03ms p(99)=530.45ms
+    iterations..........................: 40     3.945165/s
+    vus.................................: 2      min=2       max=2
+    vus_max.............................: 2      min=2       max=2
+
+    NETWORK
+    data_received.......................: 1.0 MB 102 kB/s
+    data_sent...........................: 4.6 kB 456 B/s
+
+
+
+
+running (10.1s), 0/2 VUs, 40 complete and 0 interrupted iterations
+prometheus_metrics_smoke ✓ [ 100% ] 1 VUs  10s
+table_availability_smoke ✓ [ 100% ] 1 VUs  10s

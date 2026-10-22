@@ -341,7 +341,8 @@ jobs:
           echo " Script: load-tests/scripts/smoke.js"
           echo "=============================================================================="
 
-          export TARGET_URL="http://127.0.0.1:5000/api/tables/availability"
+          export BASE_URL="http://127.0.0.1:5000"
+          export TARGET_URL="${BASE_URL}/api/tables/availability"
           k6 run \
             --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' \
             --summary-export=test-reports/load/smoke-summary.json \

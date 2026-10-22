@@ -1,7 +1,7 @@
 # Cinnamon Bistro Load Testing Report
 
-**Course:** SE3112 — Automated Testing Pipeline  
-**Test date:** 17 October 2026 (Asia/Colombo)  
+**Course:** SE3112 — Automated Testing Pipeline
+**Test dates:** 17, 21, and 22 October 2026 (Asia/Colombo)
 **Target:** `GET http://localhost:5000/api/tables/availability`
 
 ## 1. Introduction
@@ -56,7 +56,7 @@ See [`evidence/EVIDENCE_INDEX.md`](evidence/EVIDENCE_INDEX.md) for the file-by-f
 
 ## 8. Conclusion
 
-The four k6 scenarios ran successfully against the verified local API and produced reproducible JSON summaries and console logs. This completes the local endpoint performance check. Database-backed reservation performance and CI execution remain outside the verified scope. The shared GitHub Actions load-test job is still a placeholder; the group leader would need to integrate a smoke run after CI can start an isolated service and its dependencies.
+The four k6 profiles and the expanded two-endpoint smoke ran successfully against the verified local API and produced reproducible JSON summaries and console logs. The shared GitHub Actions workflow now starts the reservation service in an isolated runner, executes the smoke script, processes the summary, and uploads artifacts. The smoke script exercises availability and `/metrics`; the workflow passes the service base URL so both requests target the runner. The CI run for this feature change remains unverified until the updated pull request workflow completes. Database-backed reservation performance remains outside the verified scope.
 
 ## Reproduce
 
@@ -81,3 +81,32 @@ $env:OrderExpiry__Enabled = 'false'
 $env:Logging__EventLog__LogLevel__Default = 'Critical'
 dotnet run --no-build --project backend/reservation-service/reservation-service.csproj --no-launch-profile --urls http://localhost:5000
 ```
+
+## Additional endpoint coverage (21 October 2026)
+
+The existing local k6 smoke was rerun unchanged in workload against the availability endpoint, and a second independent smoke scenario was added for the Prometheus metrics endpoint. No original CSP application source files were changed.
+
+Direct HTTP probes returned:
+
+- `GET /api/tables/availability`: HTTP 200 with `{"available":true,"message":"Tables are available for reservation today."}`.
+- `GET /metrics`: HTTP 200 with `Content-Type: text/plain; version=0.0.4; charset=utf-8` and Prometheus HELP/TYPE metadata and metric samples.
+
+Each smoke scenario ran for 10 seconds at 1 VU (2 VUs total), producing 20 requests per endpoint. All endpoint-specific thresholds passed: p95 < 1000 ms, HTTP failures < 1%, checks > 99%, and at least one request per endpoint. Availability recorded 20 requests at 1.958941 requests/sec, 1.09 ms average, 2.00 ms p95, 2.06 ms p99, 0/20 failures, and 60/60 checks. Metrics recorded 20 requests at 1.958941 requests/sec, 7.67 ms average, 12.55 ms p95, 23.70 ms p99, 0/20 failures, and 80/80 checks. Combined: 40 requests, 3.917882 requests/sec, 4.38 ms average, 8.05 ms p95, 20.76 ms p99, 0% HTTP failures, and 140/140 checks.
+
+The raw expanded output and k6 JSON are in [`evidence/expanded-smoke-output.txt`](evidence/expanded-smoke-output.txt) and [`evidence/expanded-smoke-summary.json`](evidence/expanded-smoke-summary.json). The separate availability-only regression run is in [`evidence/legacy-smoke-output.txt`](evidence/legacy-smoke-output.txt) and [`evidence/legacy-smoke-summary.json`](evidence/legacy-smoke-summary.json). Its p95 was 12.69 ms, with 20 requests, 0% HTTP failures, 60/60 checks, and all thresholds passing.
+
+This smoke only validates the lightweight availability and monitoring endpoints; it does not represent database-backed reservation or ordering workload. These local results are not a GitHub Actions result and do not guarantee production capacity.
+
+## Latest local smoke verification (22 October 2026)
+
+The local reservation service was started from the separate CSP checkout with the Kafka publisher and order-expiry worker disabled. Direct HTTP probes confirmed HTTP 200 from both endpoints, the expected availability JSON, and a Prometheus text response from `/metrics` (`text/plain; version=0.0.4; charset=utf-8`) with metadata and metric samples. No CSP source files were modified.
+
+The expanded k6 smoke ran two concurrent scenarios for 10 seconds each at 1 VU per endpoint (2 VUs total). Availability completed 20 requests at 1.972582 requests/sec, with 1.88 ms average, 5.26 ms p95, 10.64 ms p99, zero HTTP failures, and 60/60 checks passed. Metrics completed 20 requests at 1.972582 requests/sec, with 5.42 ms average, 6.11 ms p95, 9.64 ms p99, zero HTTP failures, and 80/80 checks passed. Combined results were 40 requests at 3.945165 requests/sec, 3.65 ms average, 6.11 ms p95, 11.42 ms p99, 0/40 HTTP failures, and 140/140 checks passed. All global and endpoint-specific thresholds passed.
+
+The exact output and summary are preserved in [`evidence/expanded-smoke-2026-10-22-output.txt`](evidence/expanded-smoke-2026-10-22-output.txt) and [`evidence/expanded-smoke-2026-10-22-summary.json`](evidence/expanded-smoke-2026-10-22-summary.json). This is a local measurement, not a GitHub Actions result; the pull request's CI status must be confirmed after these changes are pushed.
+
+## CI-target configuration validation (22 October 2026)
+
+The expanded suite was run again locally with the same base URL configuration now used by the workflow: `BASE_URL=http://127.0.0.1:5000`, with the availability `TARGET_URL` set to that host as well. Both endpoint probes returned HTTP 200. At 1 VU per endpoint for 10 seconds, the run made 20 requests per endpoint (40 total), passed all 140 checks, and had zero HTTP failures. Availability measured 0.845 ms average, 1.37 ms p95, and 1.60 ms p99; metrics measured 4.67 ms average, 5.20 ms p95, and 5.86 ms p99. Combined throughput was 3.957769 requests/sec with 2.76 ms average, 5.09 ms p95, and 5.69 ms p99. All global and endpoint-specific thresholds passed.
+
+Raw output and the machine-readable summary are available in [`evidence/expanded-smoke-2026-10-22-ci-target-output.txt`](evidence/expanded-smoke-2026-10-22-ci-target-output.txt) and [`evidence/expanded-smoke-2026-10-22-ci-target-summary.json`](evidence/expanded-smoke-2026-10-22-ci-target-summary.json). These are local verification results; GitHub Actions for the PR remains pending.

@@ -1,4 +1,4 @@
-﻿Test: controlled stress
+Test: controlled stress
 Started: 2026-10-17 13:00:07 +05:30
 Finished: 2026-10-17 13:01:12 +05:30
 Target: http://localhost:5000/api/tables/availability
@@ -7,7 +7,7 @@ Environment: isolated local ASP.NET Core reservation service; publisher and expi
 --- k6 output ---
 
 
-  █ THRESHOLDS 
+  █ THRESHOLDS
 
     checks
     ✓ 'rate>0.95' rate=100.00%
@@ -19,7 +19,7 @@ Environment: isolated local ASP.NET Core reservation service; publisher and expi
     ✓ 'rate<0.05' rate=0.00%
 
 
-  █ TOTAL RESULTS 
+  █ TOTAL RESULTS
 
     checks_total.......: 7599    116.564344/s
     checks_succeeded...: 100.00% 7599 out of 7599
@@ -30,8 +30,8 @@ Environment: isolated local ASP.NET Core reservation service; publisher and expi
     ✓ availability response is true
 
     HTTP
-    http_req_duration..............: avg=557.41µs min=0s       med=530.1µs  max=2.11ms   p(50)=530.1µs  p(90)=1.06ms   p(95)=1.18ms   p(99)=1.43ms  
-      { expected_response:true }...: avg=557.41µs min=0s       med=530.1µs  max=2.11ms   p(50)=530.1µs  p(90)=1.06ms   p(95)=1.18ms   p(99)=1.43ms  
+    http_req_duration..............: avg=557.41µs min=0s       med=530.1µs  max=2.11ms   p(50)=530.1µs  p(90)=1.06ms   p(95)=1.18ms   p(99)=1.43ms
+      { expected_response:true }...: avg=557.41µs min=0s       med=530.1µs  max=2.11ms   p(50)=530.1µs  p(90)=1.06ms   p(95)=1.18ms   p(99)=1.43ms
     http_req_failed................: 0.00%  0 out of 2533
     http_reqs......................: 2533   38.854781/s
 

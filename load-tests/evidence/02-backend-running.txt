@@ -1,4 +1,4 @@
-﻿Backend: Cinnamon Bistro reservation-service
+Backend: Cinnamon Bistro reservation-service
 HTTP probe captured: 2026-10-17 13:02:19 +05:30; service was running
 Target: http://localhost:5000/api/tables/availability
 Runtime controls: Kafka publisher disabled; order-expiry background worker disabled
@@ -35,5 +35,3 @@ info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Development
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: C:\Users\navin\OneDrive\Desktop\Smart-Restaurant-Management-System\backend\reservation-service
-
-
