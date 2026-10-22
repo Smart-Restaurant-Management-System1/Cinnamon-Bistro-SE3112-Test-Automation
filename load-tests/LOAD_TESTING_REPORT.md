@@ -56,7 +56,7 @@ See [`evidence/EVIDENCE_INDEX.md`](evidence/EVIDENCE_INDEX.md) for the file-by-f
 
 ## 8. Conclusion
 
-The four k6 scenarios ran successfully against the verified local API and produced reproducible JSON summaries and console logs. This completes the local endpoint performance check. Database-backed reservation performance and CI execution remain outside the verified scope. The shared GitHub Actions load-test job is still a placeholder; the group leader would need to integrate a smoke run after CI can start an isolated service and its dependencies.
+The four k6 profiles and the expanded two-endpoint smoke ran successfully against the verified local API and produced reproducible JSON summaries and console logs. The shared GitHub Actions workflow now starts the reservation service in an isolated runner, executes the smoke script, processes the summary, and uploads artifacts. The smoke script exercises availability and `/metrics`; the workflow passes the service base URL so both requests target the runner. The CI run for this feature change remains unverified until the updated pull request workflow completes. Database-backed reservation performance remains outside the verified scope.
 
 ## Reproduce
 
@@ -103,4 +103,10 @@ The local reservation service was started from the separate CSP checkout with th
 
 The expanded k6 smoke ran two concurrent scenarios for 10 seconds each at 1 VU per endpoint (2 VUs total). Availability completed 20 requests at 1.972582 requests/sec, with 1.88 ms average, 5.26 ms p95, 10.64 ms p99, zero HTTP failures, and 60/60 checks passed. Metrics completed 20 requests at 1.972582 requests/sec, with 5.42 ms average, 6.11 ms p95, 9.64 ms p99, zero HTTP failures, and 80/80 checks passed. Combined results were 40 requests at 3.945165 requests/sec, 3.65 ms average, 6.11 ms p95, 11.42 ms p99, 0/40 HTTP failures, and 140/140 checks passed. All global and endpoint-specific thresholds passed.
 
-The exact output and summary are preserved in [`evidence/expanded-smoke-2026-10-22-output.txt`](evidence/expanded-smoke-2026-10-22-output.txt) and [`evidence/expanded-smoke-2026-10-22-summary.json`](evidence/expanded-smoke-2026-10-22-summary.json). This is a local measurement, not a GitHub Actions result; CI status and integration against the latest `develop` revision remain unverified.
+The exact output and summary are preserved in [`evidence/expanded-smoke-2026-10-22-output.txt`](evidence/expanded-smoke-2026-10-22-output.txt) and [`evidence/expanded-smoke-2026-10-22-summary.json`](evidence/expanded-smoke-2026-10-22-summary.json). This is a local measurement, not a GitHub Actions result; the pull request's CI status must be confirmed after these changes are pushed.
+
+## CI-target configuration validation (22 October 2026)
+
+The expanded suite was run again locally with the same base URL configuration now used by the workflow: `BASE_URL=http://127.0.0.1:5000`, with the availability `TARGET_URL` set to that host as well. Both endpoint probes returned HTTP 200. At 1 VU per endpoint for 10 seconds, the run made 20 requests per endpoint (40 total), passed all 140 checks, and had zero HTTP failures. Availability measured 0.845 ms average, 1.37 ms p95, and 1.60 ms p99; metrics measured 4.67 ms average, 5.20 ms p95, and 5.86 ms p99. Combined throughput was 3.957769 requests/sec with 2.76 ms average, 5.09 ms p95, and 5.69 ms p99. All global and endpoint-specific thresholds passed.
+
+Raw output and the machine-readable summary are available in [`evidence/expanded-smoke-2026-10-22-ci-target-output.txt`](evidence/expanded-smoke-2026-10-22-ci-target-output.txt) and [`evidence/expanded-smoke-2026-10-22-ci-target-summary.json`](evidence/expanded-smoke-2026-10-22-ci-target-summary.json). These are local verification results; GitHub Actions for the PR remains pending.

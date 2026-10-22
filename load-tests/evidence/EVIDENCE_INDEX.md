@@ -22,6 +22,8 @@
 | `expanded-smoke-summary.json` | Machine-readable summary of the expanded smoke run | Expanded smoke / passed | Exact latency, request counts, and threshold values |
 | `expanded-smoke-2026-10-22-output.txt` | Full two-endpoint k6 smoke output from the latest local run | Expanded smoke / passed on 2026-10-22; 40 requests and 140/140 checks | Latest endpoint-specific measurements and thresholds |
 | `expanded-smoke-2026-10-22-summary.json` | Machine-readable summary from the latest expanded smoke run | Expanded smoke / passed | Exact latest latency and request values |
+| `expanded-smoke-2026-10-22-ci-target-output.txt` | Full k6 output using the integrated workflow's `127.0.0.1` base URL configuration | Expanded smoke / passed locally; 40 requests and 140/140 checks | CI-target configuration verification; not a GitHub Actions run |
+| `expanded-smoke-2026-10-22-ci-target-summary.json` | Machine-readable summary from the CI-target configuration smoke run | Expanded smoke / passed locally | Exact endpoint-specific latency and request values |
 | `../LOAD_TESTING_REPORT.md` | Plain-English summary of scope, environment, results, findings, and limits | Final report | University submission report |
 | `../../test-reports/load/smoke-summary.json` | Machine-readable smoke metrics and thresholds | Smoke / passed | Raw result data |
 | `../../test-reports/load/baseline-summary.json` | Machine-readable baseline metrics and thresholds | Baseline / passed | Raw result data |

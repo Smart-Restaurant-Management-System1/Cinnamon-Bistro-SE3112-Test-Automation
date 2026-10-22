@@ -107,6 +107,18 @@ The local reservation service was started from the separate CSP checkout with it
 
 Each endpoint ran for 10 seconds with 1 VU (2 VUs total). The thresholds remained p95 < 1000 ms, HTTP failure rate < 1%, checks > 99%, and at least one request per endpoint. The full k6 output and machine-readable summary for this run are in [`evidence/expanded-smoke-2026-10-22-output.txt`](evidence/expanded-smoke-2026-10-22-output.txt) and [`evidence/expanded-smoke-2026-10-22-summary.json`](evidence/expanded-smoke-2026-10-22-summary.json). The 2026-10-21 run above is retained separately; these workstation measurements are not a GitHub Actions result or a production capacity claim.
 
+## CI-target configuration validation (2026-10-22)
+
+To verify the same host configuration used by the integrated workflow, the expanded suite was rerun locally with `BASE_URL=http://127.0.0.1:5000` and `TARGET_URL=http://127.0.0.1:5000/api/tables/availability`. Both direct endpoint probes returned HTTP 200. The run completed 20 requests per endpoint, 140/140 checks, and zero HTTP failures; every global and endpoint-specific threshold passed.
+
+| Endpoint | Requests | Requests/sec | Avg | p95 | p99 | HTTP failures | Checks |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `GET /api/tables/availability` | 20 | 1.978885 | 0.845 ms | 1.37 ms | 1.60 ms | 0/20 (0%) | 60/60 passed |
+| `GET /metrics` | 20 | 1.978885 | 4.67 ms | 5.20 ms | 5.86 ms | 0/20 (0%) | 80/80 passed |
+| **Combined** | **40** | **3.957769** | **2.76 ms** | **5.09 ms** | **5.69 ms** | **0/40 (0%)** | **140/140 passed** |
+
+This is a local run using the CI target URL configuration, not a GitHub Actions result. Its full output and summary are recorded in [`evidence/expanded-smoke-2026-10-22-ci-target-output.txt`](evidence/expanded-smoke-2026-10-22-ci-target-output.txt) and [`evidence/expanded-smoke-2026-10-22-ci-target-summary.json`](evidence/expanded-smoke-2026-10-22-ci-target-summary.json).
+
 ## Findings, CI, and limitations
 
 The earlier 2026-10-17 local smoke attempt recorded in [`results-summary.md`](results-summary.md) failed because the service was not running; it is retained as historical evidence and is not conflated with the successful run above. The previously reported CI benchmark (20 availability requests, 60/60 checks, p95 11.53 ms) is a separate baseline and was not rerun as part of this local metrics-endpoint test.
@@ -115,4 +127,4 @@ The original availability-only smoke workload was separately rerun against the l
 
 The availability endpoint returns a lightweight response and does not exercise database-backed reservation creation, authentication, or a full customer journey. `/metrics` is an operational scrape endpoint, not a reservation workload. These results do not replace broader reservation/order workload testing or represent a production capacity guarantee.
 
-The checked-in workflow at the locally available `develop` revision still has a placeholder `load-tests` job and does not start this service or run k6. No workflow changes were made because the current CI service-startup configuration described for the newer integrated branch could not be verified from this checkout. GitHub Actions status must be confirmed on the feature branch after remote access is restored; this local run is not a CI result. Keep baseline/load/stress profiles on an authorized controlled performance runner, not on every push.
+The shared GitHub Actions workflow starts the reservation service in an isolated runner, executes `smoke.js`, processes its k6 summary, and uploads the load-test artifacts. The smoke suite runs both endpoint scenarios. CI sets `BASE_URL` to the isolated service host so `/metrics` is requested from the same runner as the availability endpoint; `TARGET_URL` continues to override the availability URL. The existing four-profile local configuration and thresholds are unchanged. GitHub Actions results must be checked on the PR; local verification is not a CI result. Keep baseline/load/stress profiles on an authorized controlled performance runner, not on every push.

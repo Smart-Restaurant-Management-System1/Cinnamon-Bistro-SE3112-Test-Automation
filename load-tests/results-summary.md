@@ -53,4 +53,19 @@ The earlier unavailable-target smoke attempt (before the service started) is ret
 
 The previously reported CI availability benchmark (1 VU, 10 seconds, 20 requests, 60/60 checks, 0% HTTP errors, p95 11.53 ms) is a separate prior result supplied for comparison. It was not rerun or reused as the result for `/metrics`.
 
-These smoke measurements describe one local machine and service process. The availability endpoint is lightweight, while `/metrics` is a monitoring scrape; neither verifies database-backed reservation creation, ordering flows, or production capacity. GitHub Actions was not run for this feature branch.
+These smoke measurements describe one local machine and service process. The availability endpoint is lightweight, while `/metrics` is a monitoring scrape; neither verifies database-backed reservation creation, ordering flows, or production capacity. The shared workflow runs the smoke profile against an isolated service and uploads its results; CI for this feature revision has not yet been verified.
+
+## CI-target configuration validation (2026-10-22)
+
+- **Environment:** Windows developer workstation, .NET SDK 10.0.401, Grafana k6 v2.2.0.
+- **Target configuration:** `BASE_URL=http://127.0.0.1:5000`; availability `TARGET_URL` set to the same host.
+- **Workload:** Two scenarios, each 1 VU for 10 seconds; 2 VUs total; 20 requests per endpoint.
+- **Direct probes:** Both availability and `/metrics` returned HTTP 200.
+
+| Endpoint | Requests | Requests/sec | Average | p95 | p99 | HTTP failures | Checks | Thresholds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `GET /api/tables/availability` | 20 | 1.978885 | 0.845 ms | 1.37 ms | 1.60 ms | 0/20 (0%) | 60/60 passed | PASS |
+| `GET /metrics` | 20 | 1.978885 | 4.67 ms | 5.20 ms | 5.86 ms | 0/20 (0%) | 80/80 passed | PASS |
+| **Combined** | **40** | **3.957769** | **2.76 ms** | **5.09 ms** | **5.69 ms** | **0/40 (0%)** | **140/140 passed** | **PASS** |
+
+All global and endpoint-specific thresholds passed. These measurements verify local execution with the workflow's endpoint configuration; they are not GitHub Actions results. Raw output and summary: [`evidence/expanded-smoke-2026-10-22-ci-target-output.txt`](evidence/expanded-smoke-2026-10-22-ci-target-output.txt) and [`evidence/expanded-smoke-2026-10-22-ci-target-summary.json`](evidence/expanded-smoke-2026-10-22-ci-target-summary.json).

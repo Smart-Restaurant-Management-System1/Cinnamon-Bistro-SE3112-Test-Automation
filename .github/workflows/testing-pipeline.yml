@@ -7,6 +7,8 @@ on:
       - develop
       - feature/code-quality-ci-pipeline
       - feature/code-coverage-quality-metrics
+      - feature/IT24102587-load-testing-ci-integration
+      - feature/IT24102587-ci-pipeline-full-activation
   pull_request:
     branches:
       - main
@@ -92,24 +94,84 @@ jobs:
           if-no-files-found: ignore
 
   unit-tests:
-    name: Unit Testing & Mocking (Perera H.L.P.S. - Pending Teammate Suite)
+    name: Unit Testing & Mocking (Perera H.L.P.S. - xUnit & Moq)
     needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Log Unit Testing Suite Status
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Cinnamon Bistro CSP Application
+        uses: actions/checkout@v4
+        with:
+          repository: Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System
+          ref: develop
+          path: target-app
+
+      - name: Setup .NET SDK (10.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore Unit Test Dependencies
         run: |
-          echo "=============================================================================="
-          echo " [INTEGRATION READY] Unit Testing & Mocking Suite"
-          echo " Assigned Owner: Perera H.L.P.S. (IT24101848)"
-          echo " Architecture Note: Baseline unit tests (570 tests) execute in quality-checks"
-          echo "                   to measure statement/branch coverage."
-          echo " Teammate Scope:   Extended service unit tests, parameterized tests, test doubles"
-          echo " Implementation:   Pending teammate check-in under unit-tests/"
-          echo "=============================================================================="
+          dotnet restore unit-tests/CinnamonBistro.UnitTests.csproj \
+            -p:TargetAppRoot=${{ github.workspace }}/target-app
+
+      - name: Execute xUnit Test Suite
+        run: |
+          mkdir -p test-reports/unit
+          dotnet test unit-tests/CinnamonBistro.UnitTests.csproj \
+            --configuration Release \
+            -p:TargetAppRoot=${{ github.workspace }}/target-app \
+            --settings quality-checks/coverlet.runsettings \
+            --logger "trx;LogFileName=unit-test-results.trx" \
+            --results-directory test-reports/unit \
+            --collect:"XPlat Code Coverage"
+
+      - name: Publish Unit Testing Step Summary
+        if: always()
+        run: |
+          echo "### 🧪 Unit Testing & Mocking — Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Owner:** Perera H.L.P.S. (IT24101848)" >> $GITHUB_STEP_SUMMARY
+          echo "**Framework:** xUnit 2.5.3 + Moq 4.20.70 (.NET 10)" >> $GITHUB_STEP_SUMMARY
+          echo "**Architecture:** Microservice unit testing isolating database/Kafka via Moq doubles" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          TRX_FILE="test-reports/unit/unit-test-results.trx"
+          if [ -f "$TRX_FILE" ]; then
+            TOTAL=$(grep -o 'total="[0-9]*"' "$TRX_FILE" | head -1 | cut -d'"' -f2 || echo "N/A")
+            PASSED=$(grep -o 'passed="[0-9]*"' "$TRX_FILE" | head -1 | cut -d'"' -f2 || echo "N/A")
+            FAILED=$(grep -o 'failed="[0-9]*"' "$TRX_FILE" | head -1 | cut -d'"' -f2 || echo "0")
+            SKIPPED=$(grep -o 'notExecuted="[0-9]*"' "$TRX_FILE" | head -1 | cut -d'"' -f2 || echo "0")
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Test Cases | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Target Application | Cinnamon Bistro CSP (\`target-app\`) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ TRX results file not found at \`$TRX_FILE\`." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          COVERAGE_FILE=$(find test-reports/unit -name "coverage.cobertura.xml" 2>/dev/null | head -1 || true)
+          if [ -n "$COVERAGE_FILE" ] && [ -f "$COVERAGE_FILE" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✓ Code coverage collected at \`$COVERAGE_FILE\`." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Unit Test Reports & Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: test-reports/unit/
+          if-no-files-found: ignore
 
   mutation-tests:
     name: Mutation Testing (Reserved / Unassigned Scope)
-    needs: unit-tests
+    needs: quality-checks
     runs-on: ubuntu-latest
     steps:
       - name: Log Reserved Scope Status
@@ -122,34 +184,195 @@ jobs:
           echo "=============================================================================="
 
   e2e-tests:
-    name: UI / End-to-End Testing (H.R.M.A.A. Bandara - Pending Integration)
+    name: UI / End-to-End Testing (H.R.M.A.A. Bandara - Playwright)
     needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Log E2E Suite Status
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Cinnamon Bistro CSP Application
+        uses: actions/checkout@v4
+        with:
+          repository: Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System
+          ref: develop
+          path: target-app
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: target-app/frontend/restaurant-web/package-lock.json
+
+      - name: Install CSP Frontend Dependencies
+        working-directory: target-app/frontend/restaurant-web
+        run: npm ci --ignore-scripts
+
+      - name: Install E2E Dependencies
+        working-directory: e2e-tests
+        run: npm ci
+
+      - name: Install Playwright Chromium & System Dependencies
+        working-directory: e2e-tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Execute Playwright Browser E2E Test Suite
+        working-directory: e2e-tests
+        env:
+          E2E_APP_PATH: ${{ github.workspace }}/target-app
+        run: npm test
+
+      - name: Publish E2E Testing Step Summary
+        if: always()
         run: |
-          echo "=============================================================================="
-          echo " [INTEGRATION READY] UI / End-to-End Testing Suite"
-          echo " Assigned Owner: H.R.M.A.A. Bandara (IT24100315)"
-          echo " Target Scope:   Automated frontend customer journeys, positive & negative flows"
-          echo " Target Folder:  e2e-tests/"
-          echo " Status:         Awaiting teammate test suite implementation."
-          echo "=============================================================================="
+          echo "### 🎭 UI / End-to-End Testing (Playwright) — Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Owner:** H.R.M.A.A. Bandara (IT24100315)" >> $GITHUB_STEP_SUMMARY
+          echo "**Framework:** Playwright 1.58.2 (Chromium Desktop)" >> $GITHUB_STEP_SUMMARY
+          echo "**Architecture:** Network-isolated customer journey tests against React 19 frontend with mocked API routes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          JUNIT_FILE="test-reports/e2e/junit.xml"
+          if [ -f "$JUNIT_FILE" ]; then
+            TOTAL=$(grep -o 'tests="[0-9]*"' "$JUNIT_FILE" | head -1 | cut -d'"' -f2 || echo "0")
+            FAILURES=$(grep -o 'failures="[0-9]*"' "$JUNIT_FILE" | head -1 | cut -d'"' -f2 || echo "0")
+            ERRORS=$(grep -o 'errors="[0-9]*"' "$JUNIT_FILE" | head -1 | cut -d'"' -f2 || echo "0")
+            SKIPPED=$(grep -o 'skipped="[0-9]*"' "$JUNIT_FILE" | head -1 | cut -d'"' -f2 || echo "0")
+            PASSED=$(( TOTAL - FAILURES - ERRORS - SKIPPED ))
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Test Specs | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failures | $FAILURES |" >> $GITHUB_STEP_SUMMARY
+            echo "| Errors | $ERRORS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Execution Mode | Headless Chromium + Local Vite Dev Server |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ JUnit report file not found at \`$JUNIT_FILE\`." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload E2E Test Reports & Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-reports
+          path: test-reports/e2e/
+          if-no-files-found: ignore
 
   load-tests:
-    name: Load & Performance Testing (D.M.N. Presanjith - Pending Integration)
+    name: Load & Performance Testing (D.M.N. Presanjith - k6 Smoke Suite)
     needs: quality-checks
     runs-on: ubuntu-latest
     steps:
-      - name: Log Performance Suite Status
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Cinnamon Bistro CSP Application
+        uses: actions/checkout@v4
+        with:
+          repository: Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System
+          ref: develop
+          path: target-app
+
+      - name: Setup .NET SDK (10.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Grafana k6 (v0.54.0)
+        uses: grafana/setup-k6-action@v1
+        with:
+          k6-version: '0.54.0'
+
+      - name: Start Reservation Microservice (Isolated)
         run: |
           echo "=============================================================================="
-          echo " [INTEGRATION READY] Load & Performance Testing Suite"
-          echo " Assigned Owner: D.M.N. Presanjith (IT24101505)"
-          echo " Target Scope:   Endpoint load testing, concurrency profiles, latency percentiles"
-          echo " Target Folder:  load-tests/"
-          echo " Status:         Awaiting teammate test suite implementation."
+          echo " Starting Reservation Service backend in isolated mode..."
+          echo " Environment: ASPNETCORE_ENVIRONMENT=Development"
+          echo " Disabling Kafka publisher (Kafka__PublisherEnabled=false)"
+          echo " Disabling Order Expiry background worker (OrderExpiry__Enabled=false)"
+          echo " Target Endpoint: http://127.0.0.1:5000/api/tables/availability"
           echo "=============================================================================="
+
+          mkdir -p test-reports/load
+          export ASPNETCORE_ENVIRONMENT=Development
+          export Kafka__PublisherEnabled=false
+          export OrderExpiry__Enabled=false
+          export Logging__EventLog__LogLevel__Default=Critical
+          export ASPNETCORE_URLS="http://127.0.0.1:5000"
+
+          dotnet run --project target-app/backend/reservation-service/reservation-service.csproj --no-launch-profile > test-reports/load/backend.log 2>&1 &
+          BACKEND_PID=$!
+          echo "$BACKEND_PID" > test-reports/load/backend.pid
+          echo "Backend process launched in background (PID: $BACKEND_PID)."
+
+      - name: Await Backend Endpoint Readiness
+        run: |
+          echo "Waiting for reservation service availability endpoint to respond..."
+          READY=false
+          for i in $(seq 1 30); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5000/api/tables/availability || true)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✓ Backend ready and responding HTTP 200 after ${i}s."
+              READY=true
+              break
+            fi
+            echo "  Attempt ${i}/30: HTTP code '$HTTP_CODE'. Retrying in 1s..."
+            sleep 1
+          done
+
+          if [ "$READY" != "true" ]; then
+            echo "✗ Backend failed to start or become responsive within 30 seconds."
+            echo "=== Backend Log Output ==="
+            cat test-reports/load/backend.log 2>/dev/null || true
+            exit 1
+          fi
+
+      - name: Execute k6 Smoke Load Test
+        id: k6_run
+        run: |
+          echo "=============================================================================="
+          echo " Executing k6 smoke test suite against live isolated backend..."
+          echo " Script: load-tests/scripts/smoke.js"
+          echo "=============================================================================="
+
+          export BASE_URL="http://127.0.0.1:5000"
+          export TARGET_URL="${BASE_URL}/api/tables/availability"
+          k6 run \
+            --summary-trend-stats='avg,min,med,max,p(50),p(90),p(95),p(99)' \
+            --summary-export=test-reports/load/smoke-summary.json \
+            load-tests/scripts/smoke.js 2>&1 | tee test-reports/load/k6-execution.log
+
+      - name: Process Load Testing Metrics & Generate Step Summary
+        if: always()
+        run: |
+          node scripts/process-load-summary.js \
+            --json test-reports/load/smoke-summary.json \
+            --output test-reports/load/load-summary.md \
+            --profile "Smoke Profile (1 VU, 10s)" \
+            --target-url "http://127.0.0.1:5000/api/tables/availability"
+
+      - name: Teardown Isolated Backend Process
+        if: always()
+        run: |
+          if [ -f "test-reports/load/backend.pid" ]; then
+            BACKEND_PID=$(cat test-reports/load/backend.pid)
+            echo "Terminating backend process PID $BACKEND_PID..."
+            kill -9 "$BACKEND_PID" 2>/dev/null || true
+          fi
+
+      - name: Upload Load Testing Reports & Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-testing-reports
+          path: test-reports/load/
+          if-no-files-found: ignore
 
   publish-reports:
     name: Consolidated Pipeline Summary
@@ -157,11 +380,90 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Publish Pipeline Summary Notice
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download Quality & Coverage Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: quality-and-coverage-reports
+          path: test-reports/
+
+      - name: Download Unit Test Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: unit-test-reports
+          path: test-reports/unit/
+
+      - name: Generate Dual-Source Coverage Report
+        run: |
+          mkdir -p test-reports/coverage
+          node quality-checks/process-dual-coverage.js \
+            --baseline-json test-reports/coverage/reports/Summary.json \
+            --unit-dir test-reports/unit \
+            --output test-reports/coverage/dual-coverage-summary.md \
+            --min-line-coverage 40.0 \
+            --min-branch-coverage 35.0
+
+      - name: Publish Dual-Source Coverage Summary
+        if: always()
+        run: |
+          if [ -f "test-reports/coverage/dual-coverage-summary.md" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat "test-reports/coverage/dual-coverage-summary.md" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Dual-Source Coverage Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dual-coverage-summary
+          path: test-reports/coverage/dual-coverage-summary.md
+          if-no-files-found: ignore
+
+      - name: Evaluate Pipeline Status & Publish Consolidated Summary
+        if: always()
         run: |
           echo "=============================================================================="
-          echo " [PIPELINE STAGE COMPLETE] Phase 2: Code Quality, Unit Testing & Coverage"
-          echo " Code Quality & Metrics checks executed successfully."
-          echo " Unit tests passed (570/570) and ReportGenerator HTML dashboard generated."
-          echo " Teammate suites (Unit, E2E, Load) are integration-ready."
+          echo " SE3112 Automated Testing Pipeline — Consolidated Stage Status"
+          echo " • Code Quality & Metrics:       ${{ needs.quality-checks.result }}"
+          echo " • Unit Testing & Mocking:       ${{ needs.unit-tests.result }}"
+          echo " • UI & End-to-End Testing:      ${{ needs.e2e-tests.result }}"
+          echo " • Load & Performance Testing:   ${{ needs.load-tests.result }}"
+          echo " • Mutation Testing (Reserved):  ${{ needs.mutation-tests.result }}"
           echo "=============================================================================="
+
+          echo "## 📊 Consolidated Testing Pipeline Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Testing Scope | Assigned Owner | Framework / Tool | Job Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| 1. Code Quality & Coverage | Wijesinghe K (IT24102587) | ESLint 9 + Coverlet (.NET 10) | ${{ needs.quality-checks.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 2. Unit Testing & Mocking | Perera H.L.P.S. (IT24101848) | xUnit 2.5.3 + Moq 4.20.70 | ${{ needs.unit-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3. UI & End-to-End Testing | H.R.M.A.A. Bandara (IT24100315) | Playwright 1.58.2 (Chromium) | ${{ needs.e2e-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 4. Load & Performance Testing | D.M.N. Presanjith (IT24101505) | Grafana k6 (Smoke Profile) | ${{ needs.load-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 5. Mutation Testing (Reserved) | Unassigned | Reserved Scaffolding | ℹ️ ${{ needs.mutation-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          FAILED_JOBS=""
+          if [ "${{ needs.quality-checks.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS quality-checks"; fi
+          if [ "${{ needs.unit-tests.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS unit-tests"; fi
+          if [ "${{ needs.e2e-tests.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS e2e-tests"; fi
+          if [ "${{ needs.load-tests.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS load-tests"; fi
+
+          if [ -n "$FAILED_JOBS" ]; then
+            echo "❌ Pipeline failed due to errors in:$FAILED_JOBS"
+            echo "> [!CAUTION]" >> $GITHUB_STEP_SUMMARY
+            echo "> **Pipeline Gate Failed:** One or more critical testing stages did not pass:$FAILED_JOBS. Check individual job logs and uploaded artifacts." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ All 4 assessed testing stages passed successfully."
+            echo "> [!NOTE]" >> $GITHUB_STEP_SUMMARY
+            echo "> **All 4 Assessed Testing Scopes Active & Passing:** All quality, unit, E2E, and load testing stages passed successfully. Consolidated reports are available in workflow artifacts." >> $GITHUB_STEP_SUMMARY
+          fi
