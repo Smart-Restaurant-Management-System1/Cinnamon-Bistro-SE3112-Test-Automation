@@ -1,13 +1,19 @@
 name: SE3112 Live Identity Service E2E Testing
 
 on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: live-identity-e2e-${{ github.ref }}
+  group: live-identity-e2e-${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
