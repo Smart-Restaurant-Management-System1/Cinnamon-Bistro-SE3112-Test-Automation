@@ -15,10 +15,10 @@ This project validates the **Cinnamon Bistro SE3022 Cloud Services Platform (CSP
 
 | Student Name | Student ID | Individual Testing Area | Additional Group Role | Assigned Focus & Primary Responsibilities |
 | :--- | :--- | :--- | :--- | :--- |
-| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader / Pipeline Lead** | • GitHub repository and branch policy management<br>• Overall test automation architecture and CI/CD orchestration<br>• GitHub Actions pipeline setup, stages, and integration<br>• Static code analysis and code quality metrics configuration (ESLint baseline regression gate)<br>• Automated execution of 570 CSP baseline tests & Coverlet quality gate floors (>= 40% Line, >= 35% Branch)<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16)<br>• Automated reporting parser test suite (13 unit tests, `process-dual-coverage.test.js`)<br>• Integration of all members' testing suites into CI with consolidated summaries and artifacts |
-| **H.R.M.A.A. Bandara** | `IT24100315` | **UI / End-to-End (E2E) Testing** | QA Engineer (UI/E2E) | • Automated frontend testing and realistic user workflows using Playwright (13 browser tests)<br>• End-to-end customer journeys across Public UI (8 tests) and Mocked Customer UI (5 tests)<br>• Deterministic in-memory API route mocking via `page.route()` for network isolation<br>• Integration of E2E test suite into CI with JUnit XML, HTML reports, and failure screenshots |
+| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader / Pipeline Lead** | • GitHub repository and branch policy management<br>• Overall test automation architecture and CI/CD orchestration<br>• GitHub Actions pipeline setup, stages, and integration<br>• Static code analysis and code quality metrics configuration (ESLint baseline regression gate)<br>• Automated execution of 570 CSP baseline tests & Coverlet quality gate floors (>= 40% Line, >= 35% Branch)<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16)<br>• Automated dual-source coverage parser regression gate in CI (13 unit tests, `process-dual-coverage.test.js`, PR #21)<br>• Standalone manual Live Identity E2E workflow orchestration (`live-e2e.yml`, PR #22)<br>• Multi-stage GitHub Actions pipeline (`testing-pipeline.yml`, 7 jobs) maintaining strict default CI isolation<br>• Integration of all members' testing suites into CI with consolidated summaries and artifacts |
+| **H.R.M.A.A. Bandara** | `IT24100315` | **UI / End-to-End (E2E) Testing** | QA Engineer (UI/E2E) | • Automated frontend testing and realistic user workflows using Playwright (13 default browser tests)<br>• End-to-end customer journeys across Public UI (8 tests) and Mocked Customer UI (5 tests)<br>• Authored live Identity integration suite (3 tests against real Identity Service & MySQL, PR #18) and local reservation test<br>• Authored live test orchestration harness (`run-live.mjs`, `compose.mysql.yml`, `redact-reporter.mjs`)<br>• Deterministic in-memory API route mocking via `page.route()` for network isolation<br>• Integration of E2E test suite into CI with JUnit XML, HTML reports, and failure screenshots |
 | **Perera H.L.P.S.** | `IT24101848` | **Unit Testing & Mocking** | QA Engineer (Unit/Mocking) | • Standalone xUnit 2.5.3 test project (`CinnamonBistro.UnitTests.csproj`) with 204 unit tests<br>• Comprehensive service testing across Authentication, Authorization, Pricing, and Reservation<br>• Expanded reservation lifecycle & rescheduling coverage (48 new tests via PR #15)<br>• In-memory Moq 4.20.70 test doubles isolating repository & Kafka dependencies with `Times.Never` negative assertions<br>• Integration into CI with dynamic TRX and Coverlet Cobertura reporting |
-| **D.M.N. Presanjith** | `IT24101505` | **Load & Performance Testing** | QA Engineer (Performance) | • Performance and load testing using Grafana k6 across 4 workload profiles (Smoke, Baseline, Load, Stress)<br>• Automated CI smoke testing gate targeting reservation availability endpoint<br>• Measurement of throughput (RPS), p95 latency (11.53ms in CI), and 0.00% failure rate<br>• Technical performance documentation (`LOAD_TESTING_REPORT.md` and `results-summary.md`) |
+| **D.M.N. Presanjith** | `IT24101505` | **Load & Performance Testing** | QA Engineer (Performance) | • Performance and load testing using Grafana k6 across 4 workload profiles (Smoke, Baseline, Load, Stress)<br>• Automated CI smoke testing gate targeting reservation availability & metrics endpoints<br>• Execution of expanded CI smoke suite in Run #54 (40 requests, 140/140 checks passed, 0.00% failure rate; historical single-endpoint baseline: p95 11.53ms, 60/60 checks)<br>• Technical performance documentation (`LOAD_TESTING_REPORT.md` and `results-summary.md`) |
 
 ---
 
@@ -110,7 +110,9 @@ Each team member is independently responsible for presenting their individual te
   - Automated compilation, execution, and Coverlet coverage collection for 570 CSP baseline tests (44.9% Line, 42.4% Branch).
   - Automated PR blocking on quality gate floor violations (Line $\ge 40.0\%$, Branch $\ge 35.0\%$).
   - Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16) with 13 automated parser unit tests (`process-dual-coverage.test.js`).
-  - Working GitHub Actions CI workflow executing all integrated test stages and publishing downloadable artifacts (`quality-and-coverage-reports`, `dual-coverage-summary`).
+  - Automated dual-source coverage parser CI regression gate (PR #21), executing all 13 unit tests as a blocking gate before report publishing.
+  - Standalone manual Live Identity E2E workflow orchestration (`.github/workflows/live-e2e.yml`, PR #22), enabling on-demand containerized testing in GitHub Actions (Run #1: 3/3 passed) while preserving default CI isolation (Run #54: 7/7 passed).
+  - Working GitHub Actions CI workflow executing all integrated test stages and publishing downloadable artifacts (`quality-and-coverage-reports`, `dual-coverage-summary`, `live-identity-e2e-reports`).
 
 ### 5.2 H.R.M.A.A. Bandara (`IT24100315`) — UI / End-to-End (E2E) Testing
 - **Demo Ownership**: Automated UI test execution, customer journeys, positive/negative paths, and CI execution.
@@ -118,7 +120,9 @@ Each team member is independently responsible for presenting their individual te
   - Automated E2E test scripts (Playwright) executing 13 browser tests in headless Chromium against the Cinnamon Bistro frontend.
   - Realistic user workflows: authentication, landing navigation, section focus, menu category/dietary filtering, cart lifecycle, and reservation search.
   - Negative UI scenarios: invalid credentials, guest route guards (`/menu`, `/cart` -> `/login`), menu 503 retry recovery, and form validation errors.
-  - In-memory route mocking via `page.route()` for network-isolated, deterministic execution (0 live MySQL/Kafka dependencies).
+  - In-memory route mocking via `page.route()` for network-isolated, deterministic execution in default CI (0 live MySQL/Kafka dependencies).
+  - Authored live Identity integration suite (3 tests in `identity.live.spec.js`) and test harness (`run-live.mjs`, `compose.mysql.yml`, `redact-reporter.mjs`) exercising real React frontend, real ASP.NET Core / .NET 10 Identity Service, and ephemeral Docker MySQL 8 with automated cleanup verification.
+  - Authored local opt-in live reservation test (`reservation.live.spec.js`) for booking and stale-tab concurrency validation.
   - Video recordings, screenshot artifacts on failure, JUnit XML, and HTML execution reports generated within the CI pipeline.
 
 ### 5.3 Perera H.L.P.S. (`IT24101848`) — Unit Testing & Mocking
@@ -133,11 +137,11 @@ Each team member is independently responsible for presenting their individual te
 ### 5.4 D.M.N. Presanjith (`IT24101505`) — Load & Performance Testing
 - **Demo Ownership**: Automated load test execution, concurrency ramp-up, throughput and latency benchmarking, and threshold evaluation.
 - **Expected Evidence**:
-  - Load testing scripts (Grafana k6) targeting Cinnamon Bistro reservation microservice availability endpoints.
+  - Load testing scripts (Grafana k6) targeting Cinnamon Bistro reservation microservice availability and metrics endpoints.
   - Four locally executed workload profiles: Smoke (1 VU), Baseline (2 VUs), Load (20 VUs), and Stress (40 VUs).
-  - Automated CI smoke testing gate executing 20 requests over 10 seconds against isolated backend.
-  - Metric dashboards and logs showing: request rate (RPS), p95 latency (11.53ms in CI < 1000ms SLA), 0.00% error rate, and 60/60 checks passed.
-  - Comprehensive technical documentation (`load-tests/LOAD_TESTING_REPORT.md` and `load-tests/results-summary.md`).
+  - Automated CI expanded smoke testing gate executing 40 requests across availability and metrics endpoints over 10 seconds in Run #54.
+  - Metric dashboards and logs showing: 140/140 checks passed (100.0%), 0.00% failure rate, and all SLA thresholds passing in Run #54 (historical single-endpoint smoke baseline achieved p95 latency of 11.53ms < 1000ms SLA with 20 requests and 60/60 checks).
+  - Comprehensive technical performance documentation (`load-tests/LOAD_TESTING_REPORT.md` and `load-tests/results-summary.md`).
 
 ---
 
