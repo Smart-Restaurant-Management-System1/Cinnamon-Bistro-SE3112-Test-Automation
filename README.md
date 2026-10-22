@@ -114,10 +114,10 @@ Each team member owns exactly one distinct individual testing area. The shared C
 
 | Student Name | Student ID | Individual Testing Area | Group Role | Implementation Deliverables & Verifiable PRs |
 | :--- | :---: | :--- | :--- | :--- |
-| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader & CI Pipeline Lead** | • Decoupled repository architecture and branching governance.<br>• Multi-stage GitHub Actions pipeline (`testing-pipeline.yml`).<br>• ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$).<br>• Automated execution of 570 unit tests & Coverlet coverage.<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16).<br>• 13 automated parser unit tests (`process-dual-coverage.test.js`).<br>• Full CI activation of all 4 testing stages (PR #9, PR #10, PR #13, PR #16).<br>• Authored team handover guide (`docs/team-integration-guide.md`, PR #5). |
+| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader & CI Pipeline Lead** | • Decoupled repository architecture and branching governance.<br>• Multi-stage GitHub Actions pipeline (`testing-pipeline.yml`).<br>• ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$).<br>• Automated execution of 570 unit tests & Coverlet coverage.<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16).<br>• Automated dual-source coverage parser regression gate in CI (13 unit tests, PR #21).<br>• Standalone manual Live Identity E2E workflow orchestration (`live-e2e.yml`, PR #22).<br>• Full CI activation of all 4 testing stages (PR #9, PR #10, PR #13, PR #16, PR #21, PR #22).<br>• Authored team handover guide (`docs/team-integration-guide.md`, PR #5). |
 | **Perera H.L.P.S.** | `IT24101848` | **Unit Testing & Mocking** | QA Automation Engineer | • Authored standalone xUnit project (`CinnamonBistro.UnitTests.csproj`).<br>• Implemented 204 unit tests across Authentication, Authorization, Pricing, and Reservation.<br>• 48 reservation lifecycle & rescheduling tests added via PR #15.<br>• In-memory Moq test doubles isolating repository & Kafka dependencies.<br>• Parameterized tests (`[Theory]`) for boundary and interval analysis.<br>• Fully integrated into CI with TRX and Cobertura reporting (PR #11, PR #13, PR #15). |
-| **H.R.M.A.A. Bandara**| `IT24100315` | **UI / End-to-End Testing** | QA Automation Engineer | • Authored Playwright browser automation suite (`e2e-tests/`).<br>• Implemented 13 customer journey tests across Public UI and Mocked Customer UI.<br>• Network-isolated API route mocking via `page.route()` for deterministic CI.<br>• Integrated local Vite web server lifecycle management (`scripts/start-app.mjs`).<br>• Fully integrated into CI with JUnit XML, HTML reports, and screenshots (PR #12, PR #13). |
-| **D.M.N. Presanjith**| `IT24101505` | **Load & Performance Testing**| QA Automation Engineer | • Authored Grafana k6 performance suite (`load-tests/scripts/`).<br>• Executed 4 local workload profiles (Smoke, Baseline, Load, Stress).<br>• Automated CI smoke testing gate against isolated reservation microservice.<br>• Measured throughput and latency percentiles (p95: 11.53ms in CI).<br>• Authored `LOAD_TESTING_REPORT.md` and `results-summary.md` (PR #8, PR #9). |
+| **H.R.M.A.A. Bandara**| `IT24100315` | **UI / End-to-End Testing** | QA Automation Engineer | • Authored Playwright browser automation suite (`e2e-tests/`).<br>• Implemented 13 customer journey tests across Public UI and Mocked Customer UI.<br>• Network-isolated API route mocking via `page.route()` for deterministic CI.<br>• Authored live Identity integration suite (3 tests against real Identity Service & MySQL, PR #18) and local reservation test.<br>• Authored live test orchestration harness (`run-live.mjs`, `compose.mysql.yml`, `redact-reporter.mjs`).<br>• Integrated into CI with JUnit XML, HTML reports, and screenshots (PR #12, PR #13, PR #18, PR #22). |
+| **D.M.N. Presanjith**| `IT24101505` | **Load & Performance Testing**| QA Automation Engineer | • Authored Grafana k6 performance suite (`load-tests/scripts/`).<br>• Executed 4 local workload profiles (Smoke, Baseline, Load, Stress).<br>• Automated CI smoke testing gate targeting reservation availability & metrics endpoints.<br>• Verified expanded CI smoke gate (40 requests, 140/140 checks passed in Run #54; historical single-endpoint baseline: p95 11.53ms, 60/60 checks).<br>• Authored `LOAD_TESTING_REPORT.md` and `results-summary.md` (PR #8, PR #9, PR #20). |
 
 ---
 
@@ -159,15 +159,16 @@ The CI/CD pipeline definition ([`.github/workflows/testing-pipeline.yml`](.githu
    - Executes **13 Playwright browser tests** in headless Chromium using network route mocking (100% pass rate, 0 failed, 0 skipped).
    - Generates JUnit XML, self-contained HTML report, and visual failure artifacts; uploads `e2e-test-reports` bundle.
    - Publishes test spec summary table to `$GITHUB_STEP_SUMMARY`.
-5. **`load-tests` (`PASSED`, ~52s — PR #8, PR #9):**
+5. **`load-tests` (`PASSED`, ~52s — PR #8, PR #9, PR #20):**
    - Launches isolated `reservation-service` in the background with `Kafka__PublisherEnabled=false` and `OrderExpiry__Enabled=false`.
    - Runs a 30-second bounded `curl` healthcheck probe against `GET /api/tables/availability`.
-   - Executes pinned Grafana k6 (`v0.54.0`) smoke suite: 20 requests over 10 seconds.
-   - Evaluates latency thresholds via `scripts/process-load-summary.js` (**p95: 11.53ms < 1000ms SLA**, **0.00% error rate**, **60/60 checks passed**).
+   - Executes pinned Grafana k6 (`v0.54.0`) expanded smoke suite: 40 requests across availability and metrics endpoints over 10 seconds.
+   - Evaluates performance thresholds via `scripts/process-load-summary.js` (**40 requests**, **140/140 checks passed (100%)**, **0.00% error rate**, all SLA thresholds passed; historical single-endpoint baseline: p95 of 11.53ms, 60/60 checks).
    - Safely terminates background process via PID and uploads `load-testing-reports` artifact bundle.
 6. **`mutation-tests` (`Reserved / Notice Only`):** Explicitly logs notice confirming mutation testing is an unassigned exploratory scope.
-7. **`publish-reports` (`PASSED`, ~10s — PR #13, PR #16):**
+7. **`publish-reports` (`PASSED`, ~10s — PR #13, PR #16, PR #21):**
    - Downloads `quality-and-coverage-reports` and `unit-test-reports` artifacts.
+   - Executes `quality-checks/process-dual-coverage.test.js` validating the reporting parser across 13 test invariants as a blocking gate (PR #21).
    - Executes `quality-checks/process-dual-coverage.js` to dynamically generate a dual-source coverage report separating baseline from independent unit metrics.
    - Appends `dual-coverage-summary.md` and consolidated execution status to `$GITHUB_STEP_SUMMARY`.
    - Uploads `dual-coverage-summary` artifact and enforces overall pipeline gate with `if: always()` retention.
@@ -182,12 +183,75 @@ Every passing pipeline execution packages and uploads consolidated artifacts acc
 | **`e2e-test-reports.zip`** | `test-reports/e2e/` | `junit.xml`, `report/index.html`, `artifacts/*.png` | Playwright test report & visual snapshots |
 | **`load-testing-reports.zip`** | `test-reports/load/` | `smoke-summary.json`, `load-summary.md`, `backend.log`, `k6-execution.log` | k6 performance metrics & SLA verification |
 | **`dual-coverage-summary.zip`** | `test-reports/coverage/` | `dual-coverage-summary.md` | Consolidated dual-source coverage comparison |
+| **`live-identity-e2e-reports.zip`** | `test-reports/e2e-live/` | `junit.xml`, `report/index.html`, `run-summary.json`, `startup/*.log`, screenshots | On-demand live Identity & MySQL integration audit |
+
+### CI Workflow Architecture and Isolation Strategy
+
+The Cinnamon Bistro test automation framework deliberately decouples continuous integration into **two separate, purpose-built GitHub Actions workflows**:
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        TWO-TIER DECOUPLED CI/CD ARCHITECTURE                           │
+├───────────────────────────────────────────────┬────────────────────────────────────────┤
+│ 1. Automated Regression Pipeline              │ 2. On-Demand Live Identity E2E Pipeline│
+│    File: .github/workflows/testing-pipeline.yml│    File: .github/workflows/live-e2e.yml │
+│    Triggers: push, pull_request (develop, main)│    Trigger: workflow_dispatch (Manual)  │
+│    Scope: Fast, deterministic PR gating       │    Scope: Full-stack containerized live│
+│    Dependencies: In-memory mocks, zero live DB │    Dependencies: Ephemeral MySQL 8,    │
+│    Jobs: 7-job DAG (4 parallel test stages)   │                  real ASP.NET Core Svc │
+└───────────────────────────────────────────────┴────────────────────────────────────────┘
+```
+
+#### 1. Automated Regression Pipeline
+- **File:** [`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)
+- **Execution Model:** Automatically triggered on every `push` and `pull_request` targeting `develop` and `main` (concurrency group cancels obsolete in-progress runs).
+- **DAG Workflow Structure (7 Jobs):**
+  1. **Verify Repository Foundation (`foundation-check`):** Validates directory structure taxonomy, shell script executability, and workspace cleanliness.
+  2. **Code Quality, Unit Testing & Code Coverage (Phase 2) (`quality-checks`):** Depends on Job 1. Dynamically checks out CSP (`target-app/`), restores .NET 10 tools, enforces the ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$ against 129 legacy findings), executes **570 CSP baseline tests** (100% pass), and evaluates Coverlet quality floors ($\ge 40.0\%$ line, $\ge 35.0\%$ branch).
+  3. **Unit Testing & Mocking (`unit-tests`):** Depends on Job 2 (runs concurrently with Jobs 4–6). Restores and executes `unit-tests/CinnamonBistro.UnitTests.csproj` with Moq doubles isolating Kafka/database (**204 independent unit tests**, 100% pass rate).
+  4. **UI / End-to-End Testing (`e2e-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 5, 6). Installs Playwright Chromium, boots React/Vite on port 5173, and runs **13 mocked browser customer journeys** ([`e2e-tests/tests/public-ui.spec.js`](e2e-tests/tests/public-ui.spec.js), [`e2e-tests/tests/customer-mocked-ui.spec.js`](e2e-tests/tests/customer-mocked-ui.spec.js)) with `page.route()` in-memory network mocking.
+  5. **Load & Performance Testing (`load-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 4, 6). Boots isolated reservation microservice with `Kafka__PublisherEnabled=false`, healthchecks endpoint, and executes Grafana k6 expanded smoke suite across availability and metrics endpoints (40 requests, 10s, 0 failures, 140/140 checks passed).
+  6. **Mutation Testing (Reserved / Informational) (`mutation-tests`):** Depends on Job 2. Non-blocking exploratory placeholder logging scope notice confirming mutation testing is unassigned and not an implemented group requirement.
+  7. **Consolidated Pipeline Summary (`publish-reports`):** Depends on Jobs 2–6 (`if: always()`). Downloads quality and unit test artifacts, executes the Dual-Source Coverage Parser regression gate (13 unit tests via PR #21), generates dual-source coverage reports separating baseline and independent metrics, and publishes consolidated markdown summary to `$GITHUB_STEP_SUMMARY`.
+- **Reporting Parser Regression Gate (PR #21):** Executes **13 automated parser unit tests** ([`quality-checks/process-dual-coverage.test.js`](quality-checks/process-dual-coverage.test.js)) as a blocking CI gate immediately prior to dual-source Markdown summary generation.
+- **Design Objective:** Fast (~2.5 minutes total runtime), 100% deterministic, hermetic verification ensuring pull requests are never delayed or failed by external services, database startup variance, or port conflicts.
+
+#### 2. On-Demand Live Identity E2E Pipeline
+- **File:** [`.github/workflows/live-e2e.yml`](.github/workflows/live-e2e.yml)
+- **Execution Model:** Exclusively triggered manually via `workflow_dispatch`. Does not execute on PRs or branch pushes.
+- **Scope & Multi-Tier Infrastructure:** Standalone single-job workflow (`live-identity-e2e`) on `ubuntu-latest`. Checks out CSP into `target-app/`, restores .NET 10 SDK, compiles the real ASP.NET Core Identity Service (`backend/identity-service`), spins up an ephemeral MySQL 8 container via Docker Compose ([`e2e-tests/live/compose.mysql.yml`](e2e-tests/live/compose.mysql.yml)), applies SQL migrations (`01_init_identity.sql`, `02_admin_user_management.sql`), boots the real React/Vite frontend on loopback, and executes Bandara's live Playwright tests ([`e2e-tests/live/tests/identity.live.spec.js`](e2e-tests/live/tests/identity.live.spec.js)) through the Node.js test orchestrator ([`e2e-tests/live/run-live.mjs`](e2e-tests/live/run-live.mjs)).
+- **Security & Ephemeral Cleanup:** Uses dynamically generated random secrets (`crypto.randomBytes(32)`), enforces dual-layer secret redaction ([`e2e-tests/live/redact-reporter.mjs`](e2e-tests/live/redact-reporter.mjs)), validates zero residual database records (`Users` count = 0, `UserRoles` count = 0), tears down Docker containers and ephemeral volumes on completion, and uploads the `live-identity-e2e-reports` artifact bundle.
+
+#### 3. Engineering Rationale for Workflow Separation
+Maintaining these pipelines as distinct workflows is an intentional architectural design decision:
+1. **Reliability & Developer Velocity:** Routine pull request checks must remain fast and deterministic. Injecting multi-tier Docker container lifecycles, database initializations, and network port bindings into every PR creates environmental fragility and slows PR review cycles.
+2. **Failure Isolation:** Transient Docker image pull delays, database startup timeouts, or ephemeral port collisions in a live multi-tier environment must never block unrelated unit tests, code quality gates, or frontend UI validations.
+3. **Reduced Infrastructure Overhead & Resource Efficiency:** Full containerized integration environments consume substantial GitHub-hosted runner minutes. Running containerized MySQL and compiling ASP.NET Core services only on-demand optimizes CI resource usage.
+4. **Deterministic Mocked UI Regression Tests:** Network-isolated Playwright tests using `page.route()` verify user interfaces in seconds without network flakiness. Live tests verify true multi-tier communication when explicitly required.
+5. **Optional Deeper Real-Backend Integration:** The live workflow proves real interoperability between the React 19 frontend, ASP.NET Core / .NET 10 Identity Service, and MySQL 8 with zero mocks, complementing rather than burdening the default PR gate.
+6. **Security & Sandbox Isolation:** Live tests operate strictly against isolated ephemeral Docker volumes with runtime-generated passwords and zero hardcoded credentials, preventing cross-test state leakage.
+7. **Pipeline Maintainability & Ownership:** Separates CI workflow orchestration (led by Wijesinghe K, `IT24102587`) from live Playwright test scenario implementation and harness development (authored by Bandara H.R.M.A.A., `IT24100315`), allowing timeouts and runner dependencies to evolve independently without risking regression in the primary CI pipeline.
+
+#### 4. Trade-off Analysis & Operational Protocol
+- **Honest Trade-off:** Because live integration tests are not attached to default pull requests, live backend regressions are not caught automatically on PR creation.
+- **Operational Protocol:** The on-demand workflow must be explicitly dispatched before major releases, milestone deliveries, or whenever changes to identity endpoints, authentication models, or SQL migrations are introduced.
+- **Reservation Scope Limitation:** The live Identity workflow covers real customer registration, login, and profile validation. The single reservation live test ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) requires pre-running multi-service orchestration across both Identity and Reservation microservices and remains a local opt-in harness. It is **not** part of manual live Identity CI.
+
+#### 5. Verified Dual-Workflow CI Evidence (develop @ 701f106)
+Both workflows have been independently executed and verified against the identical develop commit `701f106`:
+- **Default CI Pipeline (Run #54):** [Actions Run #54](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39838207092) — **7/7 jobs passed** (Verify Repository Foundation, Code Quality & Coverage, Unit Testing & Mocking, UI / E2E Testing, Load & Performance Testing, Mutation Testing Notice, Consolidated Pipeline Summary).
+  - **204 independent unit tests passed** (100% pass rate; Release mode coverage: 5.9% line, 10.3% branch; 570 CSP baseline integration tests passed separately at 44.9% line, 42.4% branch).
+  - **13 mocked browser UI tests passed** (100% pass rate).
+  - **13 dual-source coverage parser regression tests passed** (100% pass rate).
+  - **Expanded k6 smoke suite passed** (Run #54: 40 requests over 10s across `/api/tables/availability` and `/metrics`, 0.00% error rate, 140/140 checks passed, all SLA thresholds passed; historical single-endpoint baseline: 20 requests, p95 11.53ms, 60/60 checks).
+- **Manual Live Identity E2E (Run #1):** [Actions Run #1](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39840017647) — **3/3 live Playwright tests passed** (registration: 4.2s, authenticated profile: 2.9s, wrong password: 1.6s; real React/Vite frontend + real ASP.NET Core / .NET 10 Identity Service + ephemeral Docker MySQL 8; cleanup verified: 0 remaining users/roles; artifact: `live-identity-e2e-reports`, 1.76 MB).
+- **Local Live Reservation Separation:** The 1 live reservation test ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) remains separate and is not part of manual live Identity CI.
 
 ---
 
 ## 6. Verified Empirical Quality & Performance Metrics
 
-All metrics reported below have been empirically measured and verified on branch `develop` (HEAD: `b96ea71`, Verified Integration: PR #15 & PR #16):
+All metrics reported below have been empirically measured and verified on branch `develop` (HEAD: `701f106`, Verified Integration: PR #15, PR #16, PR #18, PR #20, PR #21, PR #22):
 
 ### 6.1 Code Quality & Coverage Metrics (Wijesinghe K)
 - **Baseline CSP Unit Tests:** **570 / 570 Passed (100% pass rate)**.
@@ -220,24 +284,40 @@ All metrics reported below have been empirically measured and verified on branch
   - **Strict Non-Additive Policy:** Independent unit suite coverage validates isolated business logic with test doubles and is reported separately from the 570 CSP baseline integration tests. Baseline regression floors ($\ge 40\%$ line, $\ge 35\%$ branch) remain strictly enforced on baseline tests.
 
 ### 6.3 UI & End-to-End Testing Metrics (H.R.M.A.A. Bandara)
-- **Playwright Browser Test Suite:** **13 / 13 Passed (100% pass rate)** across 2 spec files.
-- **Failures:** `0` | **Skipped:** `0` | **Execution Time:** ~1.3 minutes.
-- **Tested User Journeys:**
+- **1. Default Mocked UI Browser Suite (Automated CI — `testing-pipeline.yml`):**
+  - **Results:** **13 / 13 Passed (100% pass rate)** across 2 spec files in CI Run #54.
+  - **Failures:** `0` | **Skipped:** `0` | **Execution Time:** ~1.3 minutes.
   - *Public UI (8 tests):* Landing navigation, section anchor focus (`#about`), mobile menu toggle & focus restoration, guest route guards (`/menu`, `/cart`, `/availability` -> `/login`), login form client validation, 401 alert handling, registration validation.
   - *Mocked Customer UI (5 tests):* Menu category/dietary filtering & search reset, menu 503 service error recovery via Retry, cart lifecycle (add, quantity increase/decrease, subtotal recomputation, removal), reservation search input validation, valid table search & reservation enablement.
-- **Isolation Strategy:** Network-isolated route interception via `page.route()`; frontend served via Vite on port 5173. Zero live MySQL/Kafka required.
+  - *Isolation Mechanism:* Network-isolated route interception via `page.route()`; frontend served via Vite on port 5173. Zero live MySQL/Kafka required.
+- **2. Live Identity Integration Suite (On-Demand CI — `live-e2e.yml`, PR #18 & PR #22):**
+  - **Results:** **3 / 3 Passed (100% pass rate)** in GitHub Actions Live Run #1 ([Run #39840017647](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39840017647)).
+  - **Failures:** `0` | **Skipped:** `0` | **Playwright Duration:** 10.2 seconds.
+  - *Scenarios:* Real browser registration with MySQL role verification (4.2s), real customer login & profile retrieval (2.9s), rejected wrong-password attempt with error feedback (1.6s).
+  - *Live Infrastructure:* React/Vite frontend (port 15173), real ASP.NET Core / .NET 10 Identity Service (port 15001), ephemeral Docker MySQL 8 container (port 33079, `mysql:8.0.46`).
+  - *Cleanup Verification:* `cleanupVerified: true`, zero remaining users (`0`), zero remaining user roles (`0`), Docker container and volume destroyed.
+- **3. Opt-In Live Reservation Journey (Local Development Harness Only):**
+  - **Scope:** 1 multi-step reservation booking and stale-tab concurrency conflict rejection test ([`reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)).
+  - **Local Requirement:** Requires pre-running local Identity (5001) and Reservation (5000) services with initialized database schemas. **Not** automated in CI.
 
 ### 6.4 Load & Performance Testing Metrics (D.M.N. Presanjith)
-- **Four Local Workload Profiles (PR #8):**
+- **1. Automated GitHub Actions CI Expanded Smoke Gate (CI Run #54 — PR #20):**
+  - **Executed Scenarios:** Two concurrent scenarios (`table_availability_smoke` and `prometheus_metrics_smoke`) over 10 seconds.
+  - **Target Endpoints:** `GET /api/tables/availability` and `GET /metrics`.
+  - **Total HTTP Requests:** **`40`** (20 requests per endpoint).
+  - **Checks Evaluated:** **`140 / 140 passed (100.0%)`** (0 failed checks: 60 checks on availability JSON and structure, 80 checks on Prometheus text content and metric samples).
+  - **HTTP Failures:** **`0.00%`** (0 / 40 failed).
+  - **SLA Threshold Verification:** All configured thresholds passed (`p(95) < 1000ms`, `http_req_failed rate < 0.01`, `checks rate > 0.99`, `http_reqs count > 0` for both endpoints).
+- **2. Historical Single-Endpoint CI Measurement (PR #9 Baseline):**
+  - **Target Endpoint:** `GET /api/tables/availability` exclusively (1 VU, 10s).
+  - **HTTP Requests:** 20 requests | **p95 Latency:** **`11.53 ms`** (Threshold: $p(95) < 1000\text{ms}$ -> **`PASSED`**, 86.7x safety margin).
+  - **HTTP Failures:** `0.00%` (0 / 20 failed) | **Checks:** `60 / 60 passed (100.0%)`.
+- **3. Four Local Workload Profiles (PR #8 Benchmarks):**
   - *Smoke (1 VU, 10s):* 20 requests, 1.99 req/s, p95: **`1.37 ms`**, 0.00% failures, 100% checks passed (**PASSED**).
   - *Baseline (2 VUs, 30s):* 120 requests, 3.99 req/s, p95: **`1.06 ms`**, 0.00% failures, 100% checks passed (**PASSED**).
   - *Load (20 VUs, 60s):* 1,120 requests, 18.61 req/s, p95: **`1.08 ms`**, 0.00% failures, 100% checks passed (**PASSED**).
   - *Stress (40 VUs, 65s):* 2,533 requests, 38.86 req/s, p95: **`1.19 ms`**, 0.00% failures, 100% checks passed (**PASSED**).
-- **Automated GitHub Actions CI Smoke Gate (PR #9, PR #13):**
-  - 1 VU for 10.0 seconds, 20 HTTP requests, **1.98 requests/second**.
-  - **p95 Latency:** **`11.53 ms`** (Threshold: $p(95) < 1000\text{ms}$ -> **`PASSED`**, 86.7x safety margin).
-  - **HTTP Failures:** **`0.00%`** (0 / 20 failed) | **Checks:** **`60 / 60 passed (100.0%)`**.
-  - **Scope Delineation:** Only the Smoke profile executes in CI to prevent runner contention; multi-user profiles are local capacity benchmarks.
+  - *Scope Delineation:* Only the Smoke profile executes in CI to prevent runner contention; multi-user profiles are local capacity benchmarks.
 
 ---
 
