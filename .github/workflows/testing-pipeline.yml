@@ -402,6 +402,9 @@ jobs:
           name: unit-test-reports
           path: test-reports/unit/
 
+      - name: Validate Dual-Source Coverage Parser
+        run: node --test quality-checks/process-dual-coverage.test.js
+
       - name: Generate Dual-Source Coverage Report
         run: |
           mkdir -p test-reports/coverage
