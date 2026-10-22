@@ -238,21 +238,56 @@ While both workflows now execute automatically for changes targeting `develop`, 
 - **External Repository Boundary:** Direct commits to the upstream CSP repository (`Smart-Restaurant-Management-System`) do not automatically trigger workflows in this dedicated test repository; runs trigger on PRs, pushes, or manual dispatches within `Cinnamon-Bistro-SE3112-Test-Automation`.
 - **Reservation Live Test Separation:** The single reservation live test ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) requires pre-running multi-service orchestration across both Identity and Reservation microservices and remains a local opt-in harness. It is **not** executed by the automated CI workflow.
 
-#### 5. Verified Dual-Workflow CI Evidence (develop @ 701f106)
-Both workflows have been independently executed and verified against develop:
-- **Default CI Pipeline (Run #54):** [Actions Run #54](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39838207092) — **7/7 jobs passed** (Verify Repository Foundation, Code Quality & Coverage, Unit Testing & Mocking, UI / E2E Testing, Load & Performance Testing, Mutation Testing Notice, Consolidated Pipeline Summary).
-  - **204 independent unit tests passed** (100% pass rate; Release mode coverage: 5.9% line, 10.3% branch; 570 CSP baseline integration tests passed separately at 44.9% line, 42.4% branch).
-  - **13 mocked browser UI tests passed** (100% pass rate).
-  - **13 dual-source coverage parser regression tests passed** (100% pass rate).
-  - **Expanded k6 smoke suite passed** (Run #54: 40 requests over 10s across `/api/tables/availability` and `/metrics`, 0.00% error rate, 140/140 checks passed, all SLA thresholds passed; historical single-endpoint baseline: 20 requests, p95 11.53ms, 60/60 checks).
-- **Automated Live Identity E2E (Run #1):** [Actions Run #1](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39840017647) — **3/3 live Playwright tests passed** (registration: 4.2s, authenticated profile: 2.9s, wrong password: 1.6s; real React/Vite frontend + real ASP.NET Core / .NET 10 Identity Service + ephemeral Docker MySQL 8; cleanup verified: 0 remaining users/roles; artifact: `live-identity-e2e-reports`, 1.76 MB).
-- **Local Live Reservation Separation:** The 1 live reservation test ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) remains separate and is not part of automated live Identity CI.
+### Verified GitHub Actions CI Execution Evidence
+
+Following the integration of Pull Request #24 on branch `develop` (merge commit [`62268a9`](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/commit/62268a9a78918da8e98ac1d8ed007aed8a0f1d1a)), both decoupled CI workflows executed automatically in parallel. The visual evidence below confirms the successful completion of the primary 7-job regression pipeline and the fully containerized Live Identity E2E test workflow.
+
+#### 1. Primary Regression Pipeline (Run #58)
+
+![Automated Testing Pipeline Run #58](docs/images/automated-ci-run-58.png)
+
+- **Workflow Name:** SE3112 Automated Testing Pipeline
+- **Run Number:** [#58](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39853809370)
+- **Direct GitHub Actions URL:** [https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39853809370](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39853809370)
+- **Trigger:** `push` (post-merge event on `develop`)
+- **Commit:** `62268a9`
+- **Execution Result:** **Success** — **7 / 7 jobs passed** (`foundation-check`, `quality-checks`, `unit-tests`, `e2e-tests`, `load-tests`, `mutation-tests`, `publish-reports`)
+- **Duration:** 12m 10s
+- **Number of Artifacts:** 5 artifact bundles (`quality-and-coverage-reports`, `unit-test-reports`, `e2e-test-reports`, `load-testing-reports`, `dual-coverage-summary`)
+- **Key Pipeline Highlights:**
+  - **7 Successful Jobs:** Strict DAG execution ensuring zero infrastructure pollution and deterministic gating.
+  - **570 CSP baseline tests** passed with Coverlet floors satisfied (44.9% Line, 42.4% Branch).
+  - **204 independent unit tests** passed with Moq doubles (Perera H.L.P.S. — Area 3).
+  - **13 mocked browser UI tests** passed headlessly via Chromium and `page.route()` (Bandara H.R.M.A.A. — Area 2).
+  - **Expanded k6 smoke tests** passed (40 requests, 140/140 checks passed, 0.00% error rate across `/api/tables/availability` and `/metrics` endpoints) (Presanjith D.M.N. — Area 4).
+  - **13 coverage parser regression unit tests** passed as a blocking summary publication gate (Wijesinghe K — Area 1).
+
+#### 2. Live Identity Service E2E Testing (Run #4)
+
+![Live Identity Service E2E Testing Run #4](docs/images/live-identity-e2e-run-4.png)
+
+- **Workflow Name:** SE3112 Live Identity Service E2E Testing
+- **Run Number:** [#4](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39853809369)
+- **Direct GitHub Actions URL:** [https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39853809369](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/actions/runs/39853809369)
+- **Trigger:** `push` (post-merge event on `develop`)
+- **Commit:** `62268a9`
+- **Execution Result:** **Success** — Multi-tier live integration workflow passed (`live-identity-e2e`)
+- **Duration:** 2m 06s
+- **Number of Artifacts:** 1 artifact bundle (`live-identity-e2e-reports`, 1.76 MB containing Playwright HTML report, JUnit XML, sanitized service logs, and database state summary)
+- **Key Testing Highlights:**
+  - **3 Live Tests Confirmed Passing:**
+    1. *Browser User Registration:* Real POST 201 with persistent MySQL DB record insertion.
+    2. *Authenticated User Profile:* Token-authenticated POST 200 + GET 200 session verification.
+    3. *Invalid Login Rejection:* Real 401 Unauthorized handling and user-facing error message verification.
+  - **Multi-Tier Orchestration:** Ephemeral MySQL 8 provisioned via Docker Compose ([`e2e-tests/live/compose.mysql.yml`](e2e-tests/live/compose.mysql.yml)), real ASP.NET Core .NET 10 Identity Service compiled and booted, and React/Vite frontend launched on loopback.
+  - **Zero Database Residuals:** Verified automated post-run teardown (`Users` = 0, `UserRoles` = 0); containers destroyed cleanly.
+  - **Operational Boundary Notice:** The single live reservation customer journey ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) requires multi-microservice orchestration and is maintained strictly as an isolated local test harness. It is **not** executed within CI.
 
 ---
 
 ## 6. Verified Empirical Quality & Performance Metrics
 
-All metrics reported below have been empirically measured and verified on branch `develop` (HEAD: `701f106`, Verified Integration: PR #15, PR #16, PR #18, PR #20, PR #21, PR #22):
+All metrics reported below have been empirically measured and verified on branch `develop` (HEAD: `62268a9`, Verified Integration: PR #15, PR #16, PR #18, PR #20, PR #21, PR #22, PR #23, PR #24):
 
 ### 6.1 Code Quality & Coverage Metrics (Wijesinghe K)
 - **Baseline CSP Unit Tests:** **570 / 570 Passed (100% pass rate)**.
