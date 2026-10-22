@@ -8,9 +8,14 @@
     "test:headed": "playwright test --headed",
     "report": "playwright show-report ../test-reports/e2e/report",
     "start:app": "node scripts/start-app.mjs",
-    "evidence:report": "node scripts/capture-report.mjs"
+    "evidence:report": "node scripts/capture-report.mjs",
+    "test:live": "node live/run-live.mjs",
+    "report:live": "playwright show-report ../test-reports/e2e-live/report",
+    "test:live:reservation": "node live/reservation/run-reservation.mjs",
+    "report:live:reservation": "playwright show-report ../test-reports/e2e-reservation-live/report"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2"
+    "@playwright/test": "1.58.2",
+    "mysql2": "3.24.6"
   }
 }
