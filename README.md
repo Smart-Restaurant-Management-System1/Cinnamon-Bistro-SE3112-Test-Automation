@@ -48,7 +48,7 @@ In accordance with SE3112 curriculum guidelines, the testing strategy is structu
 Cinnamon-Bistro-SE3112-Test-Automation/
 ├── .github/
 │   └── workflows/
-│       └── testing-pipeline.yml   # Multi-stage GitHub Actions CI/CD workflow (All 4 stages active)
+│       └── testing-pipeline.yml   # Unified 8-stage GitHub Actions CI/CD workflow (All 4 stages + Live E2E active)
 ├── .config/
 │   └── dotnet-tools.json          # Pinned local tool manifest (ReportGenerator 5.5.11)
 ├── docs/
@@ -114,7 +114,7 @@ Each team member owns exactly one distinct individual testing area. The shared C
 
 | Student Name | Student ID | Individual Testing Area | Group Role | Implementation Deliverables & Verifiable PRs |
 | :--- | :---: | :--- | :--- | :--- |
-| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader & CI Pipeline Lead** | • Decoupled repository architecture and branching governance.<br>• Multi-stage GitHub Actions pipeline (`testing-pipeline.yml`).<br>• ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$).<br>• Automated execution of 570 unit tests & Coverlet coverage.<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16).<br>• Automated dual-source coverage parser regression gate in CI (13 unit tests, PR #21).<br>• Automated Live Identity E2E workflow orchestration (`live-e2e.yml`: automated on PRs & pushes to develop + manual workflow_dispatch).<br>• Full CI activation of all 4 testing stages (PR #9, PR #10, PR #13, PR #16, PR #21, PR #22).<br>• Authored team handover guide (`docs/team-integration-guide.md`, PR #5). |
+| **Wijesinghe K** | `IT24102587` | **Code Quality & Metrics** | **Group Leader & CI Pipeline Lead** | • Decoupled repository architecture and branching governance.<br>• Unified 8-job GitHub Actions pipeline (`testing-pipeline.yml`) consolidating regression and live identity testing.<br>• ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$).<br>• Automated execution of 570 unit tests & Coverlet coverage.<br>• Dual-source coverage reporting architecture (`process-dual-coverage.js`, PR #16).<br>• Automated dual-source coverage parser regression gate in CI (13 unit tests, PR #21).<br>• Integrated live Identity containerized E2E testing stage with ephemeral MySQL and zero residual records.<br>• Full CI activation of all testing stages with consolidated reporting and 6 downloadable artifacts.<br>• Authored team handover guide (`docs/team-integration-guide.md`, PR #5). |
 | **Perera H.L.P.S.** | `IT24101848` | **Unit Testing & Mocking** | QA Automation Engineer | • Authored standalone xUnit project (`CinnamonBistro.UnitTests.csproj`).<br>• Implemented 204 unit tests across Authentication, Authorization, Pricing, and Reservation.<br>• 48 reservation lifecycle & rescheduling tests added via PR #15.<br>• In-memory Moq test doubles isolating repository & Kafka dependencies.<br>• Parameterized tests (`[Theory]`) for boundary and interval analysis.<br>• Fully integrated into CI with TRX and Cobertura reporting (PR #11, PR #13, PR #15). |
 | **H.R.M.A.A. Bandara**| `IT24100315` | **UI / End-to-End Testing** | QA Automation Engineer | • Authored Playwright browser automation suite (`e2e-tests/`).<br>• Implemented 13 customer journey tests across Public UI and Mocked Customer UI.<br>• Network-isolated API route mocking via `page.route()` for deterministic CI.<br>• Authored live Identity integration suite (3 tests against real Identity Service & MySQL, PR #18) and local reservation test.<br>• Authored live test orchestration harness (`run-live.mjs`, `compose.mysql.yml`, `redact-reporter.mjs`).<br>• Integrated into CI with JUnit XML, HTML reports, and screenshots (PR #12, PR #13, PR #18, PR #22). |
 | **D.M.N. Presanjith**| `IT24101505` | **Load & Performance Testing**| QA Automation Engineer | • Authored Grafana k6 performance suite (`load-tests/scripts/`).<br>• Executed 4 local workload profiles (Smoke, Baseline, Load, Stress).<br>• Automated CI smoke testing gate targeting reservation availability & metrics endpoints.<br>• Verified expanded CI smoke gate (40 requests, 140/140 checks passed in Run #54; historical single-endpoint baseline: p95 11.53ms, 60/60 checks).<br>• Authored `LOAD_TESTING_REPORT.md` and `results-summary.md` (PR #8, PR #9, PR #20). |
@@ -128,13 +128,14 @@ The CI/CD pipeline definition ([`.github/workflows/testing-pipeline.yml`](.githu
 ### Pipeline DAG Workflow Topology
 ```text
 [1. foundation-check] ──► [2. quality-checks] ──► Parallel Concurrent Execution:
-       (PASSED)                  (PASSED)               ├──► [3. unit-tests  (xUnit + Moq: 204 tests - PASSED)]
-                                                        ├──► [4. e2e-tests   (Playwright: 13 tests - PASSED)]
-                                                        ├──► [5. load-tests  (k6 Smoke Profile - PASSED)]
-                                                        └──► [6. mutation-tests (Reserved Notice)]
+       (PASSED)                  (PASSED)               ├──► [3. unit-tests       (xUnit + Moq: 204 tests - PASSED)]
+                                                        ├──► [4. e2e-tests        (Playwright: 13 mocked tests - PASSED)]
+                                                        ├──► [5. load-tests       (k6 Smoke Profile - PASSED)]
+                                                        ├──► [6. mutation-tests   (Reserved Notice)]
+                                                        └──► [7. live-identity-e2e (Playwright Live + Docker MySQL - PASSED)]
                                                                       │
-[7. publish-reports] ◄────────────────────────────────────────┘
-       (PASSED — Dual-Source Coverage Reporting & Quality Gate Evaluation)
+[8. publish-reports] ◄────────────────────────────────────────┘
+       (PASSED — Consolidated Dual Coverage, Live E2E Audit & Pipeline Gate)
 ```
 
 ### Stage Execution Breakdown
@@ -165,13 +166,21 @@ The CI/CD pipeline definition ([`.github/workflows/testing-pipeline.yml`](.githu
    - Executes pinned Grafana k6 (`v0.54.0`) expanded smoke suite: 40 requests across availability and metrics endpoints over 10 seconds.
    - Evaluates performance thresholds via `scripts/process-load-summary.js` (**40 requests**, **140/140 checks passed (100%)**, **0.00% error rate**, all SLA thresholds passed; historical single-endpoint baseline: p95 of 11.53ms, 60/60 checks).
    - Safely terminates background process via PID and uploads `load-testing-reports` artifact bundle.
-6. **`mutation-tests` (`Reserved / Notice Only`):** Explicitly logs notice confirming mutation testing is an unassigned exploratory scope.
-7. **`publish-reports` (`PASSED`, ~10s — PR #13, PR #16, PR #21):**
-   - Downloads `quality-and-coverage-reports` and `unit-test-reports` artifacts.
+6. **`mutation-tests` (`Reserved / Notice Only`, ~5s):** Explicitly logs notice confirming mutation testing is an unassigned exploratory scope.
+7. **`live-identity-e2e` (`PASSED`, ~2m 06s — PR #18, PR #22, Unified STEP 185):**
+   - Checks out CSP into `target-app/` and provisions .NET 10 SDK and Node.js 20.
+   - Spins up ephemeral MySQL 8 container via Docker Compose ([`e2e-tests/live/compose.mysql.yml`](e2e-tests/live/compose.mysql.yml)) and applies SQL migrations.
+   - Compiles and starts real ASP.NET Core Identity Service (`backend/identity-service`) on loopback port 15001.
+   - Launches React 19 frontend via Vite on loopback port 15173.
+   - Executes **3 live Playwright tests** ([`e2e-tests/live/tests/identity.live.spec.js`](e2e-tests/live/tests/identity.live.spec.js)) via `run-live.mjs`: user registration, profile retrieval, and invalid login rejection.
+   - Asserts zero residual records (`Users` count = 0, `UserRoles` count = 0), performs clean container teardown, and uploads `live-identity-e2e-reports` bundle.
+8. **`publish-reports` (`PASSED`, ~10s — PR #13, PR #16, PR #21, Unified STEP 185):**
+   - Depends on all 6 upstream jobs (`quality-checks`, `unit-tests`, `mutation-tests`, `e2e-tests`, `load-tests`, `live-identity-e2e`) with `if: always()`.
+   - Downloads `quality-and-coverage-reports`, `unit-test-reports`, and `live-identity-e2e-reports` artifacts.
    - Executes `quality-checks/process-dual-coverage.test.js` validating the reporting parser across 13 test invariants as a blocking gate (PR #21).
    - Executes `quality-checks/process-dual-coverage.js` to dynamically generate a dual-source coverage report separating baseline from independent unit metrics.
-   - Appends `dual-coverage-summary.md` and consolidated execution status to `$GITHUB_STEP_SUMMARY`.
-   - Uploads `dual-coverage-summary` artifact and enforces overall pipeline gate with `if: always()` retention.
+   - Appends `dual-coverage-summary.md` and consolidated 8-job execution status to `$GITHUB_STEP_SUMMARY`.
+   - Uploads `dual-coverage-summary` artifact and enforces overall pipeline gate, halting on any failure across all assessed jobs (`quality-checks`, `unit-tests`, `e2e-tests`, `load-tests`, `live-identity-e2e`).
 
 ### Downloadable CI Artifact Bundles
 Every passing pipeline execution packages and uploads consolidated artifacts accessible from the GitHub Actions run summary:
@@ -185,62 +194,47 @@ Every passing pipeline execution packages and uploads consolidated artifacts acc
 | **`dual-coverage-summary.zip`** | `test-reports/coverage/` | `dual-coverage-summary.md` | Consolidated dual-source coverage comparison |
 | **`live-identity-e2e-reports.zip`** | `test-reports/e2e-live/` | `junit.xml`, `report/index.html`, `run-summary.json`, `startup/*.log`, screenshots | Automated live Identity & ephemeral MySQL integration audit |
 
-### CI Workflow Architecture and Isolation Strategy
+### CI Workflow Architecture: Unified 8-Job Pipeline
 
-The Cinnamon Bistro test automation framework deliberately decouples continuous integration into **two separate, purpose-built GitHub Actions workflows**:
+Following the architectural consolidation plan (STEP 185), the Cinnamon Bistro test automation framework operates as a single, unified GitHub Actions workflow ([`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)) orchestrating **8 sequential and concurrent jobs** across isolated `ubuntu-latest` virtual environments:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                        TWO-TIER DECOUPLED CI/CD ARCHITECTURE                           │
-├───────────────────────────────────────────────┬────────────────────────────────────────┤
-│ 1. Default Automated Regression Pipeline      │ 2. Automated Live Identity E2E Pipeline│
-│    File: .github/workflows/testing-pipeline.yml│    File: .github/workflows/live-e2e.yml │
-│    Triggers: push (develop, main),            │    Triggers: push (develop),           │
-│              pull_request (develop, main),    │              pull_request (develop),   │
-│              workflow_dispatch (Manual)       │              workflow_dispatch (Manual)│
-│    Scope: Fast, deterministic PR gating       │    Scope: Full-stack containerized live│
-│    Dependencies: In-memory mocks, zero live DB │    Dependencies: Ephemeral MySQL 8,    │
-│    Jobs: 7-job DAG (4 parallel test stages)   │                  real ASP.NET Core Svc │
-└───────────────────────────────────────────────┴────────────────────────────────────────┘
+│                        UNIFIED 8-JOB CI/CD PIPELINE ARCHITECTURE                       │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ File: .github/workflows/testing-pipeline.yml                                            │
+│ Triggers: push (develop, main, feature/IT24102587-unified-ci-pipeline),                │
+│           pull_request (develop, main),                                                │
+│           workflow_dispatch (Manual execution)                                         │
+│ Permissions: contents: read                                                            │
+│ DAG Topology: foundation-check ──► quality-checks ──► 5 Concurrent Jobs ──► publish-reports │
+│ Concurrent Jobs: unit-tests | e2e-tests | load-tests | mutation-tests | live-identity-e2e│
+│ Downloadable Artifacts: 6 comprehensive bundles published per passing execution       │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 1. Default Automated Regression Pipeline
-- **File:** [`.github/workflows/testing-pipeline.yml`](.github/workflows/testing-pipeline.yml)
-- **Execution Model:** Automatically triggered on every `push` and `pull_request` targeting `develop` and `main` (concurrency group cancels obsolete in-progress runs). Also supports manual execution via `workflow_dispatch`.
-- **DAG Workflow Structure (7 Jobs):**
-  1. **Verify Repository Foundation (`foundation-check`):** Validates directory structure taxonomy, shell script executability, and workspace cleanliness.
-  2. **Code Quality, Unit Testing & Code Coverage (Phase 2) (`quality-checks`):** Depends on Job 1. Dynamically checks out CSP (`target-app/`), restores .NET 10 tools, enforces the ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$ against 129 legacy findings), executes **570 CSP baseline tests** (100% pass), and evaluates Coverlet quality floors ($\ge 40.0\%$ line, $\ge 35.0\%$ branch).
-  3. **Unit Testing & Mocking (`unit-tests`):** Depends on Job 2 (runs concurrently with Jobs 4–6). Restores and executes `unit-tests/CinnamonBistro.UnitTests.csproj` with Moq doubles isolating Kafka/database (**204 independent unit tests**, 100% pass rate).
-  4. **UI / End-to-End Testing (`e2e-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 5, 6). Installs Playwright Chromium, boots React/Vite on port 5173, and runs **13 mocked browser customer journeys** ([`e2e-tests/tests/public-ui.spec.js`](e2e-tests/tests/public-ui.spec.js), [`e2e-tests/tests/customer-mocked-ui.spec.js`](e2e-tests/tests/customer-mocked-ui.spec.js)) with `page.route()` in-memory network mocking.
-  5. **Load & Performance Testing (`load-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 4, 6). Boots isolated reservation microservice with `Kafka__PublisherEnabled=false`, healthchecks endpoint, and executes Grafana k6 expanded smoke suite across availability and metrics endpoints (40 requests, 10s, 0 failures, 140/140 checks passed).
-  6. **Mutation Testing (Reserved / Informational) (`mutation-tests`):** Depends on Job 2. Non-blocking exploratory placeholder logging scope notice confirming mutation testing is unassigned and not an implemented group requirement.
-  7. **Consolidated Pipeline Summary (`publish-reports`):** Depends on Jobs 2–6 (`if: always()`). Downloads quality and unit test artifacts, executes the Dual-Source Coverage Parser regression gate (13 unit tests via PR #21), generates dual-source coverage reports separating baseline and independent metrics, and publishes consolidated markdown summary to `$GITHUB_STEP_SUMMARY`.
-- **Reporting Parser Regression Gate (PR #21):** Executes **13 automated parser unit tests** ([`quality-checks/process-dual-coverage.test.js`](quality-checks/process-dual-coverage.test.js)) as a blocking CI gate immediately prior to dual-source Markdown summary generation.
-- **Design Objective:** Fast (~2.5 minutes total runtime), 100% deterministic, hermetic verification ensuring pull requests are never delayed or failed by external services, database startup variance, or port conflicts.
+#### 1. Unified 8-Job Workflow Structure
+1. **Verify Repository Foundation (`foundation-check`):** Validates directory structure taxonomy, shell script executability, and workspace cleanliness (~8s).
+2. **Code Quality, Unit Testing & Code Coverage (Phase 2) (`quality-checks`):** Depends on Job 1. Dynamically checks out CSP (`target-app/`), restores .NET 10 tools, enforces ESLint baseline regression gate ($\Delta_{\text{new errors}} = 0$ against 129 legacy findings), executes **570 CSP baseline tests** (100% pass), and evaluates Coverlet quality floors ($\ge 40.0\%$ line, $\ge 35.0\%$ branch) (~2m 01s).
+3. **Unit Testing & Mocking (`unit-tests`):** Depends on Job 2 (runs concurrently with Jobs 4–7). Restores and executes `unit-tests/CinnamonBistro.UnitTests.csproj` with Moq doubles isolating Kafka/database (**204 independent unit tests**, 100% pass rate) (~25s).
+4. **UI / End-to-End Testing (`e2e-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 5, 6, 7). Installs Playwright Chromium, boots React/Vite on port 5173, and runs **13 mocked browser customer journeys** ([`e2e-tests/tests/public-ui.spec.js`](e2e-tests/tests/public-ui.spec.js), [`e2e-tests/tests/customer-mocked-ui.spec.js`](e2e-tests/tests/customer-mocked-ui.spec.js)) with `page.route()` in-memory network mocking (~1m 15s).
+5. **Load & Performance Testing (`load-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 4, 6, 7). Boots isolated reservation microservice with `Kafka__PublisherEnabled=false`, healthchecks endpoint, and executes Grafana k6 expanded smoke suite across availability and metrics endpoints (40 requests, 10s, 0 failures, 140/140 checks passed) (~52s).
+6. **Mutation Testing (Reserved / Informational) (`mutation-tests`):** Depends on Job 2 (runs concurrently with Jobs 3, 4, 5, 7). Non-blocking exploratory placeholder logging scope notice confirming mutation testing is unassigned and not an implemented group requirement (~5s).
+7. **Live Identity Service E2E Testing (`live-identity-e2e`):** Depends on Job 2 (runs concurrently with Jobs 3, 4, 5, 6). Full-stack containerized integration testing on `ubuntu-latest`: checks out CSP into `target-app/`, restores .NET 10 SDK, compiles the real ASP.NET Core Identity Service (`backend/identity-service`), spins up an ephemeral MySQL 8 container via Docker Compose ([`e2e-tests/live/compose.mysql.yml`](e2e-tests/live/compose.mysql.yml)), applies SQL migrations, boots real React/Vite frontend on loopback, executes Bandara's 3 live Playwright tests ([`e2e-tests/live/tests/identity.live.spec.js`](e2e-tests/live/tests/identity.live.spec.js)) through `run-live.mjs`, validates zero residual database records (`Users` count = 0, `UserRoles` count = 0), tears down containers, and uploads `live-identity-e2e-reports` bundle (~2m 06s, timeout: 25m).
+8. **Consolidated Pipeline Summary (`publish-reports`):** Depends on Jobs 2–7 with `if: always()`. Downloads `quality-and-coverage-reports`, `unit-test-reports`, and `live-identity-e2e-reports` artifacts, executes the Dual-Source Coverage Parser regression gate (13 unit tests via PR #21), generates dual-source coverage reports separating baseline and independent metrics, publishes consolidated markdown summary to `$GITHUB_STEP_SUMMARY`, uploads `dual-coverage-summary` artifact, and evaluates overall pipeline gate status halting on any failure across all assessed jobs (`quality-checks`, `unit-tests`, `e2e-tests`, `load-tests`, `live-identity-e2e`) (~10s).
 
-#### 2. Automated Live Identity E2E Pipeline
-- **File:** [`.github/workflows/live-e2e.yml`](.github/workflows/live-e2e.yml)
-- **Execution Model:** Automatically triggered on every `pull_request` targeting `develop` and on every `push` to `develop`. Also supports manual on-demand execution via `workflow_dispatch`.
-- **Scope & Multi-Tier Infrastructure:** Standalone single-job workflow (`live-identity-e2e`) on `ubuntu-latest`. Checks out CSP into `target-app/`, restores .NET 10 SDK, compiles the real ASP.NET Core Identity Service (`backend/identity-service`), spins up an ephemeral MySQL 8 container via Docker Compose ([`e2e-tests/live/compose.mysql.yml`](e2e-tests/live/compose.mysql.yml)), applies SQL migrations (`01_init_identity.sql`, `02_admin_user_management.sql`), boots the real React/Vite frontend on loopback, and executes Bandara's 3 live Playwright tests ([`e2e-tests/live/tests/identity.live.spec.js`](e2e-tests/live/tests/identity.live.spec.js)) through the Node.js test orchestrator ([`e2e-tests/live/run-live.mjs`](e2e-tests/live/run-live.mjs)).
-- **Security & Ephemeral Cleanup:** Uses dynamically generated random secrets (`crypto.randomBytes(32)`), enforces dual-layer secret redaction ([`e2e-tests/live/redact-reporter.mjs`](e2e-tests/live/redact-reporter.mjs)), validates zero residual database records (`Users` count = 0, `UserRoles` count = 0), tears down Docker containers and ephemeral volumes on completion, and uploads the `live-identity-e2e-reports` artifact bundle.
-
-#### 3. Engineering Rationale for Workflow Separation
-While both workflows now execute automatically for changes targeting `develop`, maintaining them as two distinct GitHub Actions workflow files is an intentional architectural decision:
-1. **Infrastructure Isolation:** The default regression pipeline runs hermetically without Docker Compose, ephemeral MySQL daemons, or dynamic container port bindings, whereas the Live Identity workflow encapsulates multi-tier service orchestration and database provisioning.
-2. **Independent Failure Diagnosis:** Test failures are immediately pinpointed: a failure in `testing-pipeline.yml` signifies a regression in application code, unit logic, or frontend UI contracts, whereas a failure in `live-e2e.yml` isolates issues in multi-tier backend compilation, SQL schema initialization, or container networking.
-3. **Separate Reporting & Artifact Auditing:** Each workflow publishes independent GitHub Step Summaries and specialized downloadable artifact bundles (`quality-and-coverage-reports`, `unit-test-reports`, `e2e-test-reports`, `load-testing-reports`, `dual-coverage-summary` in the default CI; `live-identity-e2e-reports` with sanitized database logs in the live CI).
-4. **Easier Pipeline Maintenance:** Workflow definitions evolve independently. Timeout adjustments, Docker Compose configuration changes, or browser dependency updates in `live-e2e.yml` can be modified and reviewed without risking regressions in the primary 7-job regression pipeline.
-5. **Different Resource Requirements & Execution Profiles:** The default regression pipeline completes in ~2.5 minutes with minimal runner resources; the Live Identity pipeline requires container image pulls, database migrations, and ASP.NET Core compilation under a 25-minute guard window.
-
-#### 4. Trade-off Analysis & Operational Boundaries
-- **CI Resource Trade-off:** Automating live integration testing means that every PR targeting `develop` and push to `develop` now provisions Docker Compose infrastructure, adding container startup time and runner minutes alongside the fast default regression pipeline.
-- **Independent Execution Model:** Both workflows trigger in parallel as independent GitHub Actions runs on eligible PRs. A failure in either workflow flags the pull request check suite.
-- **External Repository Boundary:** Direct commits to the upstream CSP repository (`Smart-Restaurant-Management-System`) do not automatically trigger workflows in this dedicated test repository; runs trigger on PRs, pushes, or manual dispatches within `Cinnamon-Bistro-SE3112-Test-Automation`.
-- **Reservation Live Test Separation:** The single reservation live test ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) requires pre-running multi-service orchestration across both Identity and Reservation microservices and remains a local opt-in harness. It is **not** executed by the automated CI workflow.
+#### 2. Architecture Consolidation & Historical Verification Baseline
+- **Evolutionary Consolidation:** Initially, the testing architecture utilized two decoupled workflows: `.github/workflows/testing-pipeline.yml` (7 jobs) and `.github/workflows/live-e2e.yml` (1 job). In STEP 185, these were unified into a single 8-job pipeline to streamline CI execution, provide single-pane visibility, and publish all 6 artifact bundles from one consolidated run.
+- **Job Isolation Preserved:** Even within a unified workflow, GitHub Actions executes each job on an entirely distinct, clean `ubuntu-latest` virtual machine runner. This guarantees that `live-identity-e2e` (which launches Docker and ephemeral MySQL) remains strictly isolated from `e2e-tests` (which relies on in-memory route mocking) and `load-tests` (which boots the standalone reservation backend).
+- **Historical Baseline Verification:** Prior to consolidation, the architecture was independently verified on branch `develop` (HEAD: `62268a9`) via PR #24 across two benchmark executions:
+  1. Default CI Run #58 (7/7 jobs passed, 12m 10s, 5 artifacts)
+  2. Live Identity E2E Run #4 (Multi-tier containerized run passed, 2m 06s, 1 artifact)
+  These runs serve as our empirical baseline, confirming that all 8 testing stages execute cleanly and deterministically.
+- **Reservation Live Test Separation:** The single reservation live test ([`e2e-tests/live/reservation/reservation.live.spec.js`](e2e-tests/live/reservation/reservation.live.spec.js)) requires multi-microservice orchestration across both Identity and Reservation microservices and remains a local opt-in harness. It is **not** executed by the automated CI workflow.
 
 ### Verified GitHub Actions CI Execution Evidence
 
-Following the integration of Pull Request #24 on branch `develop` (merge commit [`62268a9`](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/commit/62268a9a78918da8e98ac1d8ed007aed8a0f1d1a)), both decoupled CI workflows executed automatically in parallel. The visual evidence below confirms the successful completion of the primary 7-job regression pipeline and the fully containerized Live Identity E2E test workflow.
+Following the integration of Pull Request #24 on branch `develop` (merge commit [`62268a9`](https://github.com/Smart-Restaurant-Management-System1/Cinnamon-Bistro-SE3112-Test-Automation/commit/62268a9a78918da8e98ac1d8ed007aed8a0f1d1a)), both decoupled CI workflows executed automatically in parallel. The visual evidence below confirms the successful completion of the primary 7-job regression pipeline and the fully containerized Live Identity E2E test workflow, establishing the verified empirical baseline prior to architectural unification into the single 8-job workflow.
 
 #### 1. Primary Regression Pipeline (Run #58)
 

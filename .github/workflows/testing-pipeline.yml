@@ -9,11 +9,15 @@ on:
       - feature/code-coverage-quality-metrics
       - feature/IT24102587-load-testing-ci-integration
       - feature/IT24102587-ci-pipeline-full-activation
+      - feature/IT24102587-unified-ci-pipeline
   pull_request:
     branches:
       - main
       - develop
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -374,9 +378,102 @@ jobs:
           path: test-reports/load/
           if-no-files-found: ignore
 
+  live-identity-e2e:
+    name: Live Identity Service E2E Testing (H.R.M.A.A. Bandara)
+    needs: quality-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout SE3112 Testing Repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Cinnamon Bistro CSP Application
+        uses: actions/checkout@v4
+        with:
+          repository: Smart-Restaurant-Management-System1/Smart-Restaurant-Management-System
+          ref: develop
+          path: target-app
+
+      - name: Setup .NET SDK (10.0.x)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify Host Prerequisites
+        run: |
+          echo "=============================================================================="
+          echo " Host Environment Diagnostics"
+          echo " Node.js:        $(node -v)"
+          echo " npm:            $(npm -v)"
+          echo " .NET SDK:       $(dotnet --version)"
+          echo " Docker Engine:  $(docker --version)"
+          echo " Docker Compose: $(docker compose version)"
+          echo "=============================================================================="
+
+      - name: Install CSP Frontend Dependencies
+        working-directory: target-app/frontend/restaurant-web
+        run: npm ci --ignore-scripts
+
+      - name: Install E2E Dependencies
+        working-directory: e2e-tests
+        run: npm ci
+
+      - name: Install Playwright Chromium & System Dependencies
+        working-directory: e2e-tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Execute Live Identity E2E Test Suite
+        working-directory: e2e-tests
+        env:
+          E2E_APP_PATH: ../target-app
+          E2E_LIVE_MYSQL_MODE: docker
+          CI: 'true'
+        run: |
+          echo "=============================================================================="
+          echo " Executing Live Identity Service Integration Tests"
+          echo " Orchestrator:  e2e-tests/live/run-live.mjs"
+          echo " Mode:          Docker Compose (compose.mysql.yml)"
+          echo " Target CSP:    target-app/ (develop)"
+          echo "=============================================================================="
+          npm run test:live
+
+      - name: Publish Live E2E Step Summary
+        if: always()
+        run: |
+          echo "### 🌐 Live Identity Service E2E Testing — Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Owner:** H.R.M.A.A. Bandara (IT24100315)" >> $GITHUB_STEP_SUMMARY
+          echo "**Integration Orchestrator:** Wijesinghe K (IT24102587)" >> $GITHUB_STEP_SUMMARY
+          echo "**Scope:** Live React Frontend + Real .NET 10 Identity Service + Ephemeral MySQL 8" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Mode:** Docker Compose Isolated Container (\`compose.mysql.yml\`)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "test-reports/e2e-live/run-summary.json" ]; then
+            echo "#### Run Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat test-reports/e2e-live/run-summary.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No run-summary.json generated." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Live E2E Test Reports & Redacted Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-identity-e2e-reports
+          path: test-reports/e2e-live/
+          if-no-files-found: ignore
+
   publish-reports:
     name: Consolidated Pipeline Summary
-    needs: [quality-checks, unit-tests, mutation-tests, e2e-tests, load-tests]
+    needs: [foundation-check, quality-checks, unit-tests, mutation-tests, e2e-tests, load-tests, live-identity-e2e]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -401,6 +498,27 @@ jobs:
         with:
           name: unit-test-reports
           path: test-reports/unit/
+
+      - name: Download E2E Test Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: e2e-test-reports
+          path: test-reports/e2e/
+
+      - name: Download Load Testing Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: load-testing-reports
+          path: test-reports/load/
+
+      - name: Download Live Identity E2E Reports
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: live-identity-e2e-reports
+          path: test-reports/e2e-live/
 
       - name: Validate Dual-Source Coverage Parser
         run: node --test quality-checks/process-dual-coverage.test.js
@@ -436,29 +554,62 @@ jobs:
         run: |
           echo "=============================================================================="
           echo " SE3112 Automated Testing Pipeline — Consolidated Stage Status"
-          echo " • Code Quality & Metrics:       ${{ needs.quality-checks.result }}"
-          echo " • Unit Testing & Mocking:       ${{ needs.unit-tests.result }}"
-          echo " • UI & End-to-End Testing:      ${{ needs.e2e-tests.result }}"
-          echo " • Load & Performance Testing:   ${{ needs.load-tests.result }}"
-          echo " • Mutation Testing (Reserved):  ${{ needs.mutation-tests.result }}"
+          echo " • Repository Foundation:        ${{ needs['foundation-check'].result }}"
+          echo " • Code Quality & Metrics:       ${{ needs['quality-checks'].result }}"
+          echo " • Unit Testing & Mocking:       ${{ needs['unit-tests'].result }}"
+          echo " • UI & End-to-End Testing:      ${{ needs['e2e-tests'].result }}"
+          echo " • Load & Performance Testing:   ${{ needs['load-tests'].result }}"
+          echo " • Live Identity Service E2E:    ${{ needs['live-identity-e2e'].result }}"
+          echo " • Mutation Testing (Reserved):  ${{ needs['mutation-tests'].result }}"
           echo "=============================================================================="
 
           echo "## 📊 Consolidated Testing Pipeline Execution Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Testing Scope | Assigned Owner | Framework / Tool | Job Status |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| 1. Code Quality & Coverage | Wijesinghe K (IT24102587) | ESLint 9 + Coverlet (.NET 10) | ${{ needs.quality-checks.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 2. Unit Testing & Mocking | Perera H.L.P.S. (IT24101848) | xUnit 2.5.3 + Moq 4.20.70 | ${{ needs.unit-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 3. UI & End-to-End Testing | H.R.M.A.A. Bandara (IT24100315) | Playwright 1.58.2 (Chromium) | ${{ needs.e2e-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 4. Load & Performance Testing | D.M.N. Presanjith (IT24101505) | Grafana k6 (Smoke Profile) | ${{ needs.load-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 5. Mutation Testing (Reserved) | Unassigned | Reserved Scaffolding | ℹ️ ${{ needs.mutation-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 1. Repository Foundation | Wijesinghe K (IT24102587) | Workspace & Scripts Sanity | ${{ needs['foundation-check'].result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 2. Code Quality & Coverage | Wijesinghe K (IT24102587) | ESLint 9 + Coverlet (.NET 10) | ${{ needs['quality-checks'].result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 3. Unit Testing & Mocking | Perera H.L.P.S. (IT24101848) | xUnit 2.5.3 + Moq 4.20.70 | ${{ needs['unit-tests'].result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 4. UI & End-to-End Testing (Mocked) | H.R.M.A.A. Bandara (IT24100315) | Playwright 1.58.2 (Chromium) | ${{ needs['e2e-tests'].result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 5. Load & Performance Testing | D.M.N. Presanjith (IT24101505) | Grafana k6 (Smoke Profile) | ${{ needs['load-tests'].result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 6. Live Identity Service E2E | H.R.M.A.A. Bandara (IT24100315) | Playwright + Docker MySQL 8 | ${{ needs['live-identity-e2e'].result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 7. Mutation Testing (Reserved) | Unassigned | Reserved Scaffolding | ℹ️ ${{ needs['mutation-tests'].result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           FAILED_JOBS=""
-          if [ "${{ needs.quality-checks.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS quality-checks"; fi
-          if [ "${{ needs.unit-tests.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS unit-tests"; fi
-          if [ "${{ needs.e2e-tests.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS e2e-tests"; fi
-          if [ "${{ needs.load-tests.result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS load-tests"; fi
+          if [ "${{ needs['foundation-check'].result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS foundation-check"; fi
+          if [ "${{ needs['quality-checks'].result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS quality-checks"; fi
+          if [ "${{ needs['unit-tests'].result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS unit-tests"; fi
+          if [ "${{ needs['e2e-tests'].result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS e2e-tests"; fi
+          if [ "${{ needs['load-tests'].result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS load-tests"; fi
+          if [ "${{ needs['live-identity-e2e'].result }}" != "success" ]; then FAILED_JOBS="$FAILED_JOBS live-identity-e2e"; fi
+
+          MISSING_ARTIFACTS=""
+          if [ "${{ needs['quality-checks'].result }}" = "success" ] && [ ! -f "test-reports/coverage/reports/Summary.json" ]; then
+            MISSING_ARTIFACTS="$MISSING_ARTIFACTS quality-and-coverage-reports"
+          fi
+          if [ "${{ needs['unit-tests'].result }}" = "success" ] && [ ! -f "test-reports/unit/unit-test-results.trx" ]; then
+            MISSING_ARTIFACTS="$MISSING_ARTIFACTS unit-test-reports"
+          fi
+          if [ "${{ needs['e2e-tests'].result }}" = "success" ] && [ ! -f "test-reports/e2e/junit.xml" ]; then
+            MISSING_ARTIFACTS="$MISSING_ARTIFACTS e2e-test-reports"
+          fi
+          if [ "${{ needs['load-tests'].result }}" = "success" ] && [ ! -f "test-reports/load/smoke-summary.json" ]; then
+            MISSING_ARTIFACTS="$MISSING_ARTIFACTS load-testing-reports"
+          fi
+          if [ "${{ needs['live-identity-e2e'].result }}" = "success" ] && [ ! -f "test-reports/e2e-live/run-summary.json" ] && [ ! -f "test-reports/e2e-live/junit.xml" ]; then
+            MISSING_ARTIFACTS="$MISSING_ARTIFACTS live-identity-e2e-reports"
+          fi
+
+          if [ -n "$MISSING_ARTIFACTS" ]; then
+            echo "❌ Expected artifact download(s) missing or incomplete:$MISSING_ARTIFACTS"
+            FAILED_JOBS="$FAILED_JOBS missing-artifacts($MISSING_ARTIFACTS)"
+          fi
+
+          if [ -z "$FAILED_JOBS" ] && [ ! -f "test-reports/coverage/dual-coverage-summary.md" ]; then
+            echo "❌ Expected generated dual-coverage-summary.md is missing from publish-reports."
+            FAILED_JOBS="generated-dual-coverage-summary"
+          fi
 
           if [ -n "$FAILED_JOBS" ]; then
             echo "❌ Pipeline failed due to errors in:$FAILED_JOBS"
@@ -466,7 +617,7 @@ jobs:
             echo "> **Pipeline Gate Failed:** One or more critical testing stages did not pass:$FAILED_JOBS. Check individual job logs and uploaded artifacts." >> $GITHUB_STEP_SUMMARY
             exit 1
           else
-            echo "✅ All 4 assessed testing stages passed successfully."
+            echo "✅ All required testing & validation stages passed successfully."
             echo "> [!NOTE]" >> $GITHUB_STEP_SUMMARY
-            echo "> **All 4 Assessed Testing Scopes Active & Passing:** All quality, unit, E2E, and load testing stages passed successfully. Consolidated reports are available in workflow artifacts." >> $GITHUB_STEP_SUMMARY
+            echo "> **All Assessed Testing Scopes Active & Passing:** All repository foundation, quality, unit, mocked E2E, load, and live Identity E2E testing stages passed successfully. Consolidated reports are available in workflow artifacts." >> $GITHUB_STEP_SUMMARY
           fi
